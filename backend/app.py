@@ -103,7 +103,7 @@ class OllamaProvider(Provider):
 
     async def status(self):
         try:
-            async with httpx.AsyncClient(timeout=3) as c:
+            async with httpx.AsyncClient(timeout=5) as c:
                 tags = (await c.get(f"{self.host}/api/tags")).json()
         except httpx.HTTPError:
             return False, f"Ollama is not reachable at {self.host}. Start Ollama, then reopen this panel."

@@ -1,4 +1,5 @@
 """Self-test: python selftest.py  (no key or network needed). Prints PASS/FAIL per step."""
+import fnmatch
 import json
 import os
 import struct
@@ -13,14 +14,31 @@ client = TestClient(backend.app)
 EXPECTED = {"Medical / Human Body", "Automotive", "Science", "Other"}
 
 
-def glb_mesh_names(path):
+def glb_nodes(path):
     with open(path, "rb") as f:
         magic, _, _ = struct.unpack("<III", f.read(12))
         assert magic == 0x46546C67, "not a GLB file"
         length, kind = struct.unpack("<II", f.read(8))
         assert kind == 0x4E4F534A, "first chunk is not JSON"
-        gltf = json.loads(f.read(length))
-    return {n["name"] for n in gltf["nodes"] if "mesh" in n}
+        return json.loads(f.read(length))["nodes"]
+
+
+def resolve(nodes, parts):
+    """Same rule as the viewer: a mesh belongs to the nearest named ancestor matching a part pattern."""
+    parent = {c: i for i, n in enumerate(nodes) for c in n.get("children", [])}
+    rules = [(pid, pat) for pid, p in parts.items() for pat in p.get("meshes", [pid])]
+    found = {}
+    for i, n in enumerate(nodes):
+        if "mesh" not in n:
+            continue
+        j = i
+        while j is not None:
+            hits = [(len(pat), pid) for pid, pat in rules if fnmatch.fnmatchcase(nodes[j].get("name", ""), pat)]
+            if hits:
+                found[i] = max(hits)[1]
+                break
+            j = parent.get(j)
+    return found
 
 
 def models():
@@ -40,12 +58,14 @@ def test_parts_match_meshes():
         path = backend.MODELS_DIR / m["folder"] / m["file"]
         size = path.stat().st_size
         assert size < 5 * 1024 * 1024, f"{m['id']} is {size} bytes (limit 5 MB)"
-        meshes, parts = glb_mesh_names(path), backend.load_parts(m)
-        assert set(parts) <= meshes, f"{m['id']}: parts without a mesh: {set(parts) - meshes}"
-        assert meshes <= set(parts), f"{m['id']}: meshes without parts data: {meshes - set(parts)}"
+        nodes, parts = glb_nodes(path), backend.load_parts(m)
+        found = resolve(nodes, parts)
+        empty = set(parts) - set(found.values())
+        assert not empty, f"{m['id']}: parts with no mesh: {empty}"
         for k, p in parts.items():
             assert p.get("name") and p.get("description") and p.get("facts"), f"{m['id']}/{k} incomplete"
-        out.append(f"{m['id']} {len(parts)}/{len(meshes)}")
+        total = sum("mesh" in n for n in nodes)
+        out.append(f"{m['id']} {len(parts)} parts ({len(found)}/{total} meshes)")
     return ", ".join(out)
 
 
