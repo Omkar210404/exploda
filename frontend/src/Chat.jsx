@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 
 const SUGGESTIONS = ['What does it do?', 'Give me the key facts', 'What is it connected to?'];
+const STYLES = [['simple', 'Simple'], ['standard', 'Normal'], ['technical', 'Technical']];
+const DEMO = import.meta.env.VITE_DEMO === '1'; // GitHub Pages build: no backend
 
 // one status check shared by every part's panel; retried if it failed
 let statusCheck = null;
 function getStatus() {
+  if (DEMO) return Promise.resolve({ demo: true });
   statusCheck ??= fetch('/api/status')
     .then((r) => r.json())
     .catch(() => ({ offline: true }))
@@ -12,17 +15,20 @@ function getStatus() {
   return statusCheck;
 }
 
+function loadStyle() {
+  try { return localStorage.getItem('exploda-style') || 'standard'; } catch { return 'standard'; }
+}
+
 export default function Chat({ modelId, modelName, partId, part, thread, setThread, onClose }) {
-  const [status, setStatus] = useState(null); // {configured, provider, detail} | {offline}
+  const [status, setStatus] = useState(null); // {configured, provider, detail} | {offline} | {demo}
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
+  const [style, setStyle] = useState(loadStyle);
   const end = useRef(null);
 
-  useEffect(() => {
-    getStatus().then(setStatus);
-  }, []);
-
+  useEffect(() => { getStatus().then(setStatus); }, []);
   useEffect(() => { end.current?.scrollIntoView({ block: 'end' }); }, [thread]);
+  useEffect(() => { try { localStorage.setItem('exploda-style', style); } catch { /* storage blocked */ } }, [style]);
 
   async function ask(text) {
     const q = text.trim();
@@ -39,7 +45,7 @@ export default function Chat({ modelId, modelName, partId, part, thread, setThre
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model_id: modelId, part_id: partId, messages: history.filter((m) => m.content) }),
+        body: JSON.stringify({ model_id: modelId, part_id: partId, style, messages: history.filter((m) => m.content && !m.error) }),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
@@ -68,7 +74,10 @@ export default function Chat({ modelId, modelName, partId, part, thread, setThre
           <small>{modelName}</small>
           <h2>{part.name}</h2>
         </div>
-        <button className="icon-btn" onClick={onClose} aria-label="Close chat">✕</button>
+        <div className="chat-actions">
+          {thread.length > 0 && !busy && <button className="chip" onClick={() => setThread(() => [])}>Clear</button>}
+          <button className="icon-btn" onClick={onClose} aria-label="Close chat">✕</button>
+        </div>
       </header>
 
       <details className="grounding" open={thread.length === 0}>
@@ -79,8 +88,11 @@ export default function Chat({ modelId, modelName, partId, part, thread, setThre
 
       <div className="messages">
         {status === null && <div className="state"><span className="spinner" /> Checking AI…</div>}
+        {status?.demo && (
+          <div className="state">This online demo has no AI backend, so chat is off. Run Exploda locally (free with Ollama) to ask questions. The notes above are what the AI would answer from.</div>
+        )}
         {status?.offline && <div className="state error">AI backend is offline. Start it with <code>uvicorn app:app</code> in <code>backend/</code>.</div>}
-        {status && !status.offline && !ready && (
+        {status && !status.offline && !status.demo && !ready && (
           <div className="state error"><strong>AI not configured.</strong> {status.detail}</div>
         )}
         {ready && thread.length === 0 && (
@@ -98,6 +110,14 @@ export default function Chat({ modelId, modelName, partId, part, thread, setThre
       {ready && thread.length === 0 && (
         <div className="suggestions">
           {SUGGESTIONS.map((s) => <button key={s} className="chip" onClick={() => ask(s)}>{s}</button>)}
+        </div>
+      )}
+
+      {ready && (
+        <div className="styles" role="radiogroup" aria-label="Answer style">
+          {STYLES.map(([id, label]) => (
+            <button key={id} role="radio" aria-checked={style === id} className={style === id ? 'on' : ''} onClick={() => setStyle(id)}>{label}</button>
+          ))}
         </div>
       )}
 
