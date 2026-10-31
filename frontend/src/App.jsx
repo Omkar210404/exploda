@@ -10,6 +10,10 @@ function load(key, fallback) {
 function save(key, value) {
   try { localStorage.setItem(key, value); } catch { /* storage blocked */ }
 }
+function loadThreads() {
+  try { return JSON.parse(localStorage.getItem('exploda-threads')) || {}; } catch { return {}; }
+}
+const shuffle = (list) => list.map((x) => [Math.random(), x]).sort((a, b) => a[0] - b[0]).map((x) => x[1]);
 
 export default function App() {
   const [manifest, setManifest] = useState(null);
@@ -19,12 +23,20 @@ export default function App() {
   const [hovered, setHovered] = useState(null);
   const [selected, setSelected] = useState(null);
   const [chatOpen, setChatOpen] = useState(false);
-  const [threads, setThreads] = useState({});
+  const [threads, setThreads] = useState(loadThreads);
   const [theme, setTheme] = useState(() => load('exploda-theme', 'dark'));
   const [drawer, setDrawer] = useState(false);
   const [explode, setExplode] = useState(0);
   const [hotspots, setHotspots] = useState(true);
   const [xray, setXray] = useState(false);
+  const [labels, setLabels] = useState(false);
+  const [quiz, setQuiz] = useState(null); // { ids, i, score, feedback }
+
+  useEffect(() => {
+    // keep the last 30 messages of every thread, finished answers only
+    const trimmed = Object.fromEntries(Object.entries(threads).map(([k, t]) => [k, t.filter((m) => m.content && !m.error).slice(-30)]));
+    save('exploda-threads', JSON.stringify(trimmed));
+  }, [threads]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -43,11 +55,27 @@ export default function App() {
   }, []);
 
   function openModel(m) {
-    setModel(m); setParts(null); setSelected(null); setHovered(null); setChatOpen(false); setExplode(0); setXray(false); setDrawer(false);
+    setModel(m); setParts(null); setSelected(null); setHovered(null); setChatOpen(false); setExplode(0); setXray(false); setQuiz(null); setDrawer(false);
     fetch(`${MODELS}${m.folder}/${m.parts}`)
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(r.status))))
       .then(setParts)
       .catch(() => setParts({}));
+  }
+
+  function startQuiz() {
+    setQuiz({ ids: shuffle(Object.keys(parts)).slice(0, 10), i: 0, score: 0, feedback: null });
+    setSelected(null); setChatOpen(false); setLabels(false);
+  }
+
+  function answer(id) {
+    if (!id || !quiz || quiz.feedback || quiz.i >= quiz.ids.length) return;
+    const target = quiz.ids[quiz.i], ok = id === target;
+    setSelected(target); // show the right answer in gold
+    setQuiz((q) => ({ ...q, score: q.score + (ok ? 1 : 0), feedback: { ok, picked: id } }));
+    setTimeout(() => {
+      setSelected(null);
+      setQuiz((q) => q && { ...q, i: q.i + 1, feedback: null });
+    }, ok ? 900 : 1900);
   }
 
   const category = manifest?.categories.find((c) => c.models.includes(model));
@@ -92,7 +120,8 @@ export default function App() {
               <h2 className="section-label">Parts {parts && <span>{partIds.length}</span>}</h2>
               {!parts && <div className="state"><span className="spinner" /> Loading parts…</div>}
               {parts && partIds.length === 0 && <div className="state error">No parts data found for this model.</div>}
-              <ul className="parts">
+              {quiz && <div className="state">Part names are hidden during the quiz.</div>}
+              <ul className="parts" hidden={!!quiz}>
                 {partIds.map((id) => (
                   <li key={id}>
                     <button
@@ -132,7 +161,11 @@ export default function App() {
             {partIds.some((id) => parts[id].shell) && (
               <button className={`chip ${xray ? 'on' : ''}`} onClick={() => setXray(!xray)} title="See through the outer parts">X-ray</button>
             )}
+            <button className={`chip ${labels ? 'on' : ''}`} onClick={() => setLabels(!labels)} disabled={!!quiz} title="Show every part name">Labels</button>
             <button className={`chip ${hotspots ? 'on' : ''}`} onClick={() => setHotspots(!hotspots)}>Hotspots</button>
+            <button className={`chip ${quiz ? 'on' : ''}`} onClick={() => (quiz ? setQuiz(null) : startQuiz())} disabled={!partIds.length}>
+              {quiz ? 'End quiz' : 'Quiz'}
+            </button>
             <button className="icon-btn" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} aria-label="Toggle theme">
               {theme === 'dark' ? '☀' : '☾'}
             </button>
@@ -147,15 +180,40 @@ export default function App() {
             hovered={hovered}
             selected={selected}
             onHover={setHovered}
-            onSelect={setSelected}
+            onSelect={quiz ? answer : setSelected}
             onMoreInfo={() => setChatOpen(true)}
             explode={explode}
             hotspots={hotspots}
+            labels={labels}
+            quiz={!!quiz}
             xray={xray}
             stage={model.stage}
           />
         ) : (
           <div className="state center">{error ? 'Nothing to show yet.' : <><span className="spinner" /> Preparing stage…</>}</div>
+        )}
+        {quiz && (
+          <div className="quiz glass" role="status">
+            {quiz.i < quiz.ids.length ? (
+              <>
+                <small>Question {quiz.i + 1} of {quiz.ids.length} · Score {quiz.score}</small>
+                <strong>Find the {parts[quiz.ids[quiz.i]].name}</strong>
+                {quiz.feedback ? (
+                  <span className={quiz.feedback.ok ? 'ok' : 'bad'}>
+                    {quiz.feedback.ok ? 'Correct!' : `That's the ${parts[quiz.feedback.picked].name}. The right part is shown in gold.`}
+                  </span>
+                ) : (
+                  <span>Click it on the model.{partIds.some((id) => parts[id].shell) ? ' X-ray helps with parts inside.' : ''}</span>
+                )}
+              </>
+            ) : (
+              <>
+                <small>Quiz finished</small>
+                <strong>You scored {quiz.score} / {quiz.ids.length}</strong>
+                <span><button className="chip on" onClick={startQuiz}>Play again</button></span>
+              </>
+            )}
+          </div>
         )}
         <p className="hint">Drag to orbit · scroll to zoom · right-drag to pan · click a part</p>
       </main>
