@@ -40,6 +40,16 @@
       "One orbit takes about 365.25 days."
     ]
   },
+  "moon": {
+    "name": "Moon",
+    "description": "Earth's only natural satellite.",
+    "facts": [
+      "About 384,400 km from Earth on average.",
+      "Its diameter is about a quarter of Earth's.",
+      "Always shows the same side to Earth because it is tidally locked.",
+      "Humans first landed on it in 1969 (Apollo 11)."
+    ]
+  },
   "mars": {
     "name": "Mars",
     "description": "The fourth planet, a cold desert world known as the Red Planet.",
@@ -85,7 +95,7 @@
     "description": "The eighth and farthest known planet from the Sun, a deep-blue ice giant.",
     "facts": [
       "Has the strongest winds measured in the Solar System, over 2,000 km/h.",
-      "Was found in 1846 using mathematical predictions rather than by searching the sky at random.",
+      "Was found in 1846 using mathematical predictions.",
       "Its largest moon, Triton, orbits backwards (retrograde).",
       "Takes about 165 Earth years to orbit the Sun."
     ]
