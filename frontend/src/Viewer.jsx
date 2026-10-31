@@ -1,48 +1,92 @@
 import { Component, Suspense, useEffect, useMemo, useRef } from 'react';
-import { Canvas, createPortal, useFrame } from '@react-three/fiber';
-import { Billboard, Bounds, ContactShadows, Environment, Html, Lightformer, OrbitControls, useGLTF, useProgress } from '@react-three/drei';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { Billboard, Bounds, ContactShadows, Environment, Html, OrbitControls, Stars, useGLTF, useProgress } from '@react-three/drei';
 import * as THREE from 'three';
 
 const GOLD = new THREE.Color('#f2b84b');
 const BLUE = new THREE.Color('#6fb4ff');
+const SPREAD = 0.6;
 const noRaycast = () => null;
+const HDRI = `${import.meta.env.BASE_URL}hdri/studio.hdr`;
 
-function Model({ url, parts, hovered, selected, onHover, onSelect, onMoreInfo, explode, hotspots, tooltip }) {
+// parts.json: a part covers its own mesh name, or the names/globs in "meshes" (e.g. "BodyDoorL*")
+function compileRules(parts) {
+  return Object.entries(parts).flatMap(([id, p]) => (p.meshes ?? [id]).map((pat) => {
+    const clean = THREE.PropertyBinding.sanitizeNodeName(pat).replace(/[-[\]{}()+?,\\^$|#]/g, '\\$&');
+    return { id, len: pat.length, re: new RegExp(`^${clean.replace(/\*/g, '.*')}$`) };
+  }));
+}
+
+// nearest named ancestor that matches a rule; the most specific pattern wins
+function partOf(obj, rules) {
+  for (let o = obj; o; o = o.parent) {
+    const hits = rules.filter((r) => r.re.test(o.name));
+    if (hits.length) return hits.sort((a, b) => b.len - a.len)[0].id;
+  }
+  return null;
+}
+
+function Model({ url, parts, hovered, selected, onHover, onSelect, onMoreInfo, explode, hotspots, xray, stage, tooltip }) {
   const { scene } = useGLTF(url);
-  const root = useMemo(() => scene.clone(true), [scene]);
 
-  // one material per mesh so highlighting one part never touches another
-  const meshes = useMemo(() => {
-    const list = [];
-    const all = new THREE.Box3().setFromObject(root);
-    const mid = all.getCenter(new THREE.Vector3());
+  const { root, groups, floor } = useMemo(() => {
+    const root = scene.clone(true);
+    const box = new THREE.Box3().setFromObject(root);
+    const size = box.getSize(new THREE.Vector3()), s = 4 / Math.max(size.x, size.y, size.z);
+    root.scale.multiplyScalar(s);
+    root.position.sub(box.getCenter(new THREE.Vector3()).multiplyScalar(s));
+    root.updateMatrixWorld(true);
+
+    const rules = compileRules(parts), groups = {};
     root.traverse((o) => {
       if (!o.isMesh) return;
       o.material = o.material.clone();
       o.castShadow = o.receiveShadow = true;
-      o.geometry.computeBoundingBox();
-      const center = o.geometry.boundingBox.getCenter(new THREE.Vector3());
-      const dir = center.clone().sub(mid);
-      if (dir.lengthSq() < 0.01) dir.set(0, 0, 0);
-      o.userData = { center, dir, base: o.material.emissive.clone(), baseI: o.material.emissiveIntensity };
-      list.push(o);
+      const m = o.material;
+      o.userData.base = { emissive: m.emissive?.clone(), ei: m.emissiveIntensity, opacity: m.opacity, transparent: m.transparent, depthWrite: m.depthWrite };
+      o.userData.basePos = o.position.clone();
+      o.userData.part = partOf(o, rules);
+      if (o.userData.part) (groups[o.userData.part] ??= { meshes: [], box: new THREE.Box3() }).meshes.push(o);
     });
-    return list;
-  }, [root]);
+    for (const g of Object.values(groups)) {
+      g.meshes.forEach((o) => g.box.expandByObject(o));
+      g.center = g.box.getCenter(new THREE.Vector3());
+      g.dir = g.center.lengthSq() > 0.02 ? g.center.clone() : new THREE.Vector3();
+      for (const o of g.meshes) {
+        // explode direction in the mesh's parent space, so nested/scaled nodes move correctly
+        const inv = o.parent.matrixWorld.clone().invert();
+        o.userData.dirLocal = g.center.clone().add(g.dir).applyMatrix4(inv).sub(g.center.clone().applyMatrix4(inv));
+      }
+    }
+    return { root, groups, floor: -size.y * s / 2 };
+  }, [scene, parts]);
 
   useEffect(() => {
-    for (const m of meshes) {
-      const mat = m.material;
-      if (m.name === selected) { mat.emissive.copy(GOLD); mat.emissiveIntensity = 0.3; }
-      else if (m.name === hovered) { mat.emissive.copy(BLUE); mat.emissiveIntensity = 0.22; }
-      else { mat.emissive.copy(m.userData.base); mat.emissiveIntensity = m.userData.baseI; }
+    for (const [id, g] of Object.entries(groups)) {
+      const shell = xray && parts[id]?.shell && id !== selected;
+      for (const o of g.meshes) {
+        const m = o.material, b = o.userData.base;
+        if (m.emissive) {
+          if (id === selected) { m.emissive.copy(GOLD); m.emissiveIntensity = 0.3; }
+          else if (id === hovered) { m.emissive.copy(BLUE); m.emissiveIntensity = 0.22; }
+          else { m.emissive.copy(b.emissive); m.emissiveIntensity = b.ei; }
+        }
+        m.transparent = shell || b.transparent;
+        m.opacity = shell ? 0.12 : b.opacity;
+        m.depthWrite = shell ? false : b.depthWrite;
+        m.needsUpdate = true;
+        o.raycast = shell ? noRaycast : THREE.Mesh.prototype.raycast; // click through see-through shells
+      }
     }
-  }, [meshes, hovered, selected]);
+  }, [groups, parts, hovered, selected, xray]);
 
+  const amount = useRef(0), markers = useRef({});
   useFrame((_, dt) => {
-    for (const m of meshes) {
-      const target = m.userData.dir.clone().multiplyScalar(explode * 0.6);
-      m.position.lerp(target, Math.min(1, dt * 8));
+    amount.current += (explode - amount.current) * Math.min(1, dt * 8);
+    const k = amount.current * SPREAD;
+    for (const [id, g] of Object.entries(groups)) {
+      for (const o of g.meshes) o.position.copy(o.userData.basePos).addScaledVector(o.userData.dirLocal, k);
+      markers.current[id]?.position.copy(g.center).addScaledVector(g.dir, k);
     }
   });
 
@@ -54,15 +98,14 @@ function Model({ url, parts, hovered, selected, onHover, onSelect, onMoreInfo, e
     el.style.transform = `translate(${e.clientX + 14}px, ${e.clientY + 14}px)`;
   };
 
-  const sel = meshes.find((m) => m.name === selected);
-
   return (
     <>
+      <Bounds fit clip observe margin={stage === 'space' ? 1.05 : 1.15}>
       <primitive
         object={root}
         onPointerMove={(e) => {
           e.stopPropagation();
-          const id = parts[e.object.name] ? e.object.name : null;
+          const id = e.object.userData.part;
           if (id !== hovered) onHover(id);
           moveTip(e, id ? parts[id].name : '');
           document.body.style.cursor = id ? 'pointer' : 'auto';
@@ -70,32 +113,37 @@ function Model({ url, parts, hovered, selected, onHover, onSelect, onMoreInfo, e
         onPointerOut={(e) => { onHover(null); moveTip(e, ''); document.body.style.cursor = 'auto'; }}
         onClick={(e) => {
           e.stopPropagation();
-          if (parts[e.object.name]) onSelect(e.object.name);
+          if (e.object.userData.part) onSelect(e.object.userData.part);
         }}
       />
-      {hotspots && meshes.filter((m) => parts[m.name] && m.name !== selected).map((m) => createPortal(
-        <Billboard position={m.userData.center}>
-          <mesh raycast={noRaycast} renderOrder={10}>
-            <ringGeometry args={[0.03, 0.045, 24]} />
-            <meshBasicMaterial color="#f2c46d" transparent opacity={0.5} depthTest={false} />
-          </mesh>
-          <mesh raycast={noRaycast} renderOrder={10}>
-            <circleGeometry args={[0.014, 16]} />
-            <meshBasicMaterial color="#ffe2a6" transparent opacity={0.75} depthTest={false} />
-          </mesh>
-        </Billboard>,
-        m, { key: m.name },
+      {Object.entries(groups).map(([id, g]) => (
+        <group key={id} ref={(el) => { markers.current[id] = el; }} position={g.center}>
+          {hotspots && id !== selected && (
+            <Billboard>
+              <mesh raycast={noRaycast} renderOrder={10}>
+                <ringGeometry args={[0.03, 0.045, 24]} />
+                <meshBasicMaterial color="#f2c46d" transparent opacity={0.5} depthTest={false} />
+              </mesh>
+              <mesh raycast={noRaycast} renderOrder={10}>
+                <circleGeometry args={[0.014, 16]} />
+                <meshBasicMaterial color="#ffe2a6" transparent opacity={0.75} depthTest={false} />
+              </mesh>
+            </Billboard>
+          )}
+          {id === selected && (
+            <Html center zIndexRange={[20, 10]}>
+              <div className="part-label glass">
+                <span className="dot" />
+                <strong>{parts[id].name}</strong>
+                <button onClick={(e) => { e.stopPropagation(); onMoreInfo(); }}>More info</button>
+              </div>
+            </Html>
+          )}
+        </group>
       ))}
-      {sel && createPortal(
-        <Html position={sel.userData.center} center zIndexRange={[20, 10]}>
-          <div className="part-label glass">
-            <span className="dot" />
-            <strong>{parts[selected].name}</strong>
-            <button onClick={(e) => { e.stopPropagation(); onMoreInfo(); }}>More info</button>
-          </div>
-        </Html>,
-        sel,
-      )}
+      </Bounds>
+      {stage === 'space' && groups.sun && <pointLight position={groups.sun.center} intensity={4} decay={0} />}
+      {stage !== 'space' && <ContactShadows position={[0, floor - 0.02, 0]} opacity={0.5} scale={10} blur={2.4} far={3} />}
     </>
   );
 }
@@ -117,27 +165,28 @@ class ModelError extends Component {
 
 export default function Viewer(props) {
   const tooltip = useRef(null);
-  const dark = props.theme === 'dark';
+  const space = props.stage === 'space';
   return (
-    <div className="viewer">
+    <div className={`viewer ${space ? 'space' : ''}`}>
       <Canvas shadows dpr={[1, 2]} camera={{ position: [2.6, 1.6, 6.4], fov: 40 }} onPointerMissed={() => props.onSelect(null)}>
-        <ambientLight intensity={dark ? 0.35 : 0.6} />
-        <directionalLight position={[4, 6, 5]} intensity={1.6} castShadow shadow-mapSize={[1024, 1024]} />
-        <directionalLight position={[-5, 2, -4]} intensity={0.7} color="#7aa7ff" />
-        <Environment resolution={128}>
-          <Lightformer form="rect" intensity={2} position={[0, 5, -5]} scale={[10, 4, 1]} color="#ffffff" />
-          <Lightformer form="rect" intensity={1.2} position={[-6, 1, 2]} scale={[3, 6, 1]} color="#8fb4ff" />
-          <Lightformer form="rect" intensity={1.4} position={[6, 1, 2]} scale={[3, 6, 1]} color="#ffd9a0" />
-        </Environment>
+        {space ? (
+          <>
+            <ambientLight intensity={0.06} />
+            <Stars radius={80} depth={40} count={4000} factor={3} saturation={0} fade />
+          </>
+        ) : (
+          <>
+            <ambientLight intensity={0.15} />
+            <directionalLight position={[4, 6, 5]} intensity={1.2} castShadow shadow-mapSize={[1024, 1024]} />
+          </>
+        )}
         <ModelError>
           <Suspense fallback={<Loader />}>
-            <Bounds fit clip observe margin={1.35}>
-              <Model {...props} tooltip={tooltip} />
-            </Bounds>
+            {!space && <Environment files={HDRI} environmentIntensity={0.9} />}
+            <Model {...props} tooltip={tooltip} />
           </Suspense>
         </ModelError>
-        <ContactShadows position={[0, -2.3, 0]} opacity={dark ? 0.55 : 0.3} scale={12} blur={2.6} far={4} />
-        <OrbitControls makeDefault enableDamping minDistance={2} maxDistance={20} />
+        <OrbitControls makeDefault enableDamping minDistance={1} maxDistance={20} />
       </Canvas>
       <div ref={tooltip} className="tooltip" />
     </div>

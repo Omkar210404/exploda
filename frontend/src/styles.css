@@ -94,6 +94,8 @@ code { font-size: 12px; padding: 1px 5px; border-radius: 5px; background: var(--
 /* ---------- stage ---------- */
 .stage { position: relative; min-width: 0; isolation: isolate; }
 .viewer { position: absolute; inset: 0; }
+.viewer.space { background: radial-gradient(900px 600px at 40% 50%, #0d1424 0%, #05070c 70%); }
+.credit a { color: var(--muted); }
 .toolbar { position: absolute; top: 12px; left: 16px; right: 16px; display: flex; align-items: center; gap: 12px; z-index: 3; pointer-events: none; }
 .toolbar > * { pointer-events: auto; }
 .crumbs { display: flex; flex-direction: column; }
