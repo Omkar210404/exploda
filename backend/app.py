@@ -52,7 +52,14 @@ def load_parts(model: dict) -> dict:
 NOT_SURE = "I'm not sure - that goes beyond the notes I have for this part."
 
 
-def build_system_prompt(model: dict, parts: dict, part_id: str) -> str:
+STYLES = {
+    "simple": "Explain in very simple words, as if to a 12-year-old: short sentences, no jargon.",
+    "standard": "Keep answers short (2-5 sentences) and in plain language.",
+    "technical": "Answer like a specialist, using the precise technical terms that appear in the notes. Keep it to 2-5 sentences.",
+}
+
+
+def build_system_prompt(model: dict, parts: dict, part_id: str, style: str = "standard") -> str:
     part = parts[part_id]
     facts = "\n".join(f"- {f}" for f in part["facts"])
     others = ", ".join(p["name"] for k, p in parts.items() if k != part_id)
@@ -60,8 +67,9 @@ def build_system_prompt(model: dict, parts: dict, part_id: str) -> str:
         f'You are a tutor inside Exploda, a 3D learning app. The user selected the "{part["name"]}" '
         f'in the "{model["name"]}" model.\n'
         "Answer using ONLY the reference notes below. If the notes do not contain the answer, reply "
-        f'"{NOT_SURE}" and briefly say what the notes do cover. Never invent numbers, names or facts. '
-        "Keep answers short (2-5 sentences) and in plain language.\n\n"
+        f'"{NOT_SURE}" and briefly say what the notes do cover. Never invent numbers, names or facts, '
+        "whatever the answer style.\n"
+        f"{STYLES[style]}\n\n"
         f"Reference notes for {part['name']}:\nDescription: {part['description']}\nFacts:\n{facts}\n"
         f"Other parts in this model: {others}"
     )
@@ -179,6 +187,7 @@ class ChatRequest(BaseModel):
     model_id: str
     part_id: str
     messages: list[Message] = Field(min_length=1, max_length=40)
+    style: Literal["simple", "standard", "technical"] = "standard"
 
 
 @app.get("/api/status")
@@ -203,7 +212,7 @@ async def chat(req: ChatRequest):
     if not ok:
         raise HTTPException(503, f"AI not configured. {detail}")
 
-    system = build_system_prompt(model, parts, req.part_id)
+    system = build_system_prompt(model, parts, req.part_id, req.style)
     history = [m.model_dump() for m in req.messages[-12:]]
 
     async def gen():

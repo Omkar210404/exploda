@@ -78,7 +78,14 @@ def test_ai_mock():
     bad = client.post("/api/chat", json={"model_id": "heart", "part_id": "nope",
                                          "messages": [{"role": "user", "content": "hi"}]})
     assert bad.status_code == 404
-    return "streamed grounded answer, unknown part -> 404"
+    simple = client.post("/api/chat", json={"model_id": "brain", "part_id": "cerebellum", "style": "simple",
+                                            "messages": [{"role": "user", "content": "What is it?"}]})
+    assert simple.status_code == 200 and "Cerebellum" in simple.text, simple.text
+    wrong = client.post("/api/chat", json={"model_id": "heart", "part_id": "aorta", "style": "pirate",
+                                           "messages": [{"role": "user", "content": "hi"}]})
+    assert wrong.status_code == 422
+    assert "very simple words" in backend.build_system_prompt(backend.find_model("heart"), backend.load_parts(backend.find_model("heart")), "aorta", "simple")
+    return "streamed grounded answer, answer styles, unknown part -> 404"
 
 
 def test_not_configured():
