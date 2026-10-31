@@ -1,63 +1,43 @@
 {
-  "right_atrium": {
-    "name": "Right Atrium",
-    "description": "Upper-right chamber that receives oxygen-poor blood returning from the body and passes it to the right ventricle.",
+  "heart_wall": {
+    "name": "Heart Wall (Myocardium)",
+    "shell": true,
+    "description": "The muscular outer wall of the heart. It encloses the four chambers (right and left atria, right and left ventricles) and contracts to pump blood. In this model the chambers are part of one wall mesh; turn on X-ray to see the valves and papillary muscles inside.",
     "facts": [
-      "Receives blood from the superior and inferior venae cavae and the coronary sinus.",
-      "Contains the sinoatrial (SA) node, the heart's natural pacemaker.",
-      "Empties into the right ventricle through the tricuspid valve.",
-      "Has thin muscular walls because it only pumps blood a short distance."
-    ]
-  },
-  "left_atrium": {
-    "name": "Left Atrium",
-    "description": "Upper-left chamber that receives oxygen-rich blood from the lungs and passes it to the left ventricle.",
-    "facts": [
-      "Receives blood from the four pulmonary veins.",
-      "Empties into the left ventricle through the mitral valve.",
-      "Sits at the back of the heart, close to the oesophagus.",
-      "Atrial fibrillation often starts near where the pulmonary veins join it."
-    ]
-  },
-  "right_ventricle": {
-    "name": "Right Ventricle",
-    "description": "Lower-right chamber that pumps oxygen-poor blood through the pulmonary valve into the pulmonary trunk and on to the lungs.",
-    "facts": [
-      "Forms most of the front (anterior) surface of the heart.",
-      "Its wall is thinner than the left ventricle's because the lung circulation has lower pressure.",
-      "Receives blood from the right atrium through the tricuspid valve.",
-      "Pumps into the pulmonary circulation."
-    ]
-  },
-  "left_ventricle": {
-    "name": "Left Ventricle",
-    "description": "Lower-left chamber and the heart's main pumping chamber; it pushes oxygen-rich blood through the aortic valve into the aorta and the whole body.",
-    "facts": [
-      "Has the thickest muscular wall of the four chambers, often around 1 cm in adults.",
-      "Forms the apex (pointed tip) of the heart.",
-      "Receives blood from the left atrium through the mitral valve.",
-      "The share of blood it ejects per beat is the ejection fraction; about 50-70% is typical in healthy adults."
+      "The wall has three layers: epicardium (outer), myocardium (muscle) and endocardium (inner lining).",
+      "The left ventricle has the thickest wall because it pumps blood to the whole body.",
+      "Heart muscle (cardiac muscle) contracts on its own rhythm, set by the sinoatrial (SA) node in the right atrium.",
+      "An adult heart is roughly the size of a closed fist and usually weighs about 250-350 g."
     ]
   },
   "aorta": {
     "name": "Aorta",
+    "meshes": ["ascending_aorta", "arch_of_aorta", "descending_aorta"],
     "description": "The body's largest artery. It carries oxygen-rich blood from the left ventricle to the rest of the body.",
     "facts": [
-      "Starts at the aortic valve and rises as the ascending aorta.",
-      "Curves over as the aortic arch, which gives off branches to the head and arms.",
-      "Continues down through the chest and abdomen as the descending aorta.",
+      "Has three sections shown here: the ascending aorta, the aortic arch and the descending aorta.",
+      "The aortic arch gives off branches that supply the head and arms.",
       "The coronary arteries branch from its root, just above the aortic valve.",
       "In adults it is roughly 2.5-3 cm wide near the heart."
     ]
   },
-  "pulmonary_trunk": {
-    "name": "Pulmonary Trunk",
-    "description": "Short, wide artery leaving the right ventricle that splits into the left and right pulmonary arteries, carrying oxygen-poor blood to the lungs.",
+  "pulmonary_artery": {
+    "name": "Pulmonary Artery",
+    "description": "Carries oxygen-poor blood from the right ventricle to the lungs. The trunk splits into right and left pulmonary arteries.",
     "facts": [
       "One of the few arteries that carries oxygen-poor blood.",
       "Begins at the pulmonary valve.",
-      "Divides into the right and left pulmonary arteries, one for each lung.",
-      "Shown in blue here by the common teaching convention for oxygen-poor blood."
+      "Shown in blue here by the common teaching convention for oxygen-poor blood.",
+      "High blood pressure in these vessels is called pulmonary hypertension."
+    ]
+  },
+  "pulmonary_veins": {
+    "name": "Pulmonary Veins",
+    "description": "Veins that carry oxygen-rich blood from the lungs back to the left atrium.",
+    "facts": [
+      "There are usually four: two from each lung.",
+      "They are the only veins in adults that carry oxygen-rich blood.",
+      "Shown in red here because they carry oxygen-rich blood."
     ]
   },
   "superior_vena_cava": {
@@ -75,16 +55,7 @@
     "facts": [
       "Runs up the abdomen to the right of the aorta.",
       "Passes through the diaphragm before entering the right atrium.",
-      "Drains blood from the lower half of the body."
-    ]
-  },
-  "pulmonary_veins": {
-    "name": "Pulmonary Veins",
-    "description": "Veins that carry oxygen-rich blood from the lungs back to the left atrium.",
-    "facts": [
-      "There are usually four: two from each lung.",
-      "They are the only veins in adults that carry oxygen-rich blood.",
-      "They have no valves where they enter the left atrium."
+      "Only the part near the heart is shown here."
     ]
   },
   "tricuspid_valve": {
@@ -98,7 +69,7 @@
   },
   "mitral_valve": {
     "name": "Mitral Valve",
-    "description": "Valve between the left atrium and left ventricle that stops blood flowing back into the atrium when the ventricle contracts.",
+    "description": "Valve between the left atrium and left ventricle. It opens to let blood into the left ventricle and closes to stop it flowing back when the ventricle contracts.",
     "facts": [
       "Has two leaflets, so it is also called the bicuspid valve.",
       "Named after a bishop's mitre because of its shape.",
@@ -106,33 +77,64 @@
       "In mitral valve prolapse the leaflets bulge back into the atrium."
     ]
   },
-  "aortic_valve": {
-    "name": "Aortic Valve",
-    "description": "Valve between the left ventricle and the aorta that lets blood out to the body and stops it flowing back into the ventricle.",
-    "facts": [
-      "Normally has three semilunar cusps.",
-      "About 1-2% of people are born with a bicuspid (two-cusp) aortic valve.",
-      "Its closing is part of the second heart sound ('dub').",
-      "Narrowing of this valve is called aortic stenosis."
-    ]
-  },
   "pulmonary_valve": {
     "name": "Pulmonary Valve",
-    "description": "Valve between the right ventricle and the pulmonary trunk that lets blood out to the lungs and stops it flowing back.",
+    "description": "Valve between the right ventricle and the pulmonary artery that lets blood out to the lungs and stops it flowing back.",
     "facts": [
-      "Has three semilunar cusps, like the aortic valve.",
-      "Its closing also contributes to the second heart sound.",
+      "Has three semilunar cusps.",
+      "Its closing contributes to the second heart sound ('dub').",
       "It works at lower pressure than the aortic valve."
     ]
   },
-  "coronary_arteries": {
-    "name": "Coronary Arteries",
-    "description": "Arteries running over the heart's surface that supply the heart muscle itself with oxygen-rich blood.",
+  "right_coronary_artery": {
+    "name": "Right Coronary Artery",
+    "meshes": ["rca_*"],
+    "description": "Artery that runs in the groove between the right atrium and right ventricle and supplies blood to the right side of the heart muscle.",
     "facts": [
-      "The left and right coronary arteries branch from the root of the aorta.",
-      "The left anterior descending (LAD) artery runs down the front of the heart between the ventricles.",
-      "Blockage of a coronary artery can cause a heart attack (myocardial infarction).",
-      "They fill mainly while the heart muscle relaxes (diastole)."
+      "Branches from the right side of the aortic root.",
+      "Its branches shown here include the marginal branch and the posterior interventricular branch.",
+      "In most people it supplies the sinoatrial (SA) node.",
+      "Blockage can cause a heart attack affecting the lower (inferior) wall of the heart."
+    ]
+  },
+  "left_coronary_artery": {
+    "name": "Left Coronary Artery",
+    "meshes": ["lca_*"],
+    "description": "Artery that supplies most of the left side of the heart muscle. A short stem splits into the anterior interventricular (LAD) and circumflex branches.",
+    "facts": [
+      "Branches from the left side of the aortic root.",
+      "The anterior interventricular branch is often called the LAD (left anterior descending) artery.",
+      "The circumflex branch curves around the left side of the heart.",
+      "A blockage of the LAD is a common cause of serious heart attacks."
+    ]
+  },
+  "cardiac_veins": {
+    "name": "Cardiac Veins",
+    "meshes": ["great_cardiac_vein", "middle_cardiac_vein", "anterior_cardiac_veins", "posterior_lv_veins"],
+    "description": "Veins on the heart's surface that collect oxygen-poor blood from the heart muscle.",
+    "facts": [
+      "Includes the great, middle and anterior cardiac veins and the posterior veins of the left ventricle.",
+      "Most drain into the coronary sinus.",
+      "The anterior cardiac veins drain directly into the right atrium."
+    ]
+  },
+  "coronary_sinus": {
+    "name": "Coronary Sinus",
+    "description": "A wide vein on the back of the heart that collects blood from most cardiac veins and empties it into the right atrium.",
+    "facts": [
+      "Lies in the groove between the left atrium and left ventricle on the back of the heart.",
+      "Opens into the right atrium.",
+      "Doctors use it as a route for some pacemaker leads."
+    ]
+  },
+  "papillary_muscles": {
+    "name": "Papillary Muscles",
+    "meshes": ["papillary_*"],
+    "description": "Small muscles inside the ventricles that anchor the tricuspid and mitral valve leaflets through cords (chordae tendineae).",
+    "facts": [
+      "The right ventricle has three (anterior, posterior and septal); the left ventricle has two.",
+      "They contract with the ventricle to stop the valve leaflets flipping back into the atria.",
+      "Turn on X-ray to see them inside the heart wall."
     ]
   }
 }
