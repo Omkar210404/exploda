@@ -14,14 +14,28 @@ const CACHE = new URL('./.cache/', import.meta.url);
 const OUT = new URL('../public/models/', import.meta.url);
 mkdirSync(CACHE, { recursive: true });
 
+// usage: npm run models            (all)
+//        npm run models -- brain   (comma-separated ids)
+const only = process.argv[2]?.split(',');
+const want = (id) => !only || only.includes(id);
+
 async function fetchCached(url, name) {
   const file = new URL(name, CACHE);
-  if (!existsSync(file)) {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`${res.status} ${url}`);
-    writeFileSync(file, Buffer.from(await res.arrayBuffer()));
+  for (let attempt = 1; !existsSync(file); attempt++) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`${res.status} ${url}`);
+      writeFileSync(file, Buffer.from(await res.arrayBuffer()));
+    } catch (e) {
+      if (attempt >= 4) throw e;
+    }
   }
   return readFileSync(file);
+}
+
+async function pool(items, size, fn) {
+  const queue = [...items];
+  await Promise.all(Array.from({ length: size }, async () => { while (queue.length) await fn(queue.shift()); }));
 }
 
 const linear = (hex) => { const c = new THREE.Color(hex); return [c.r, c.g, c.b, 1]; };
@@ -33,7 +47,7 @@ async function save(doc, id, maxTris = 30000, smooth = false, budgets = {}) {
     const limit = budgets[mesh.getName()] ?? maxTris;
     for (const prim of mesh.listPrimitives()) {
       const tris = prim.getIndices().getCount() / 3;
-      if (tris > limit) simplifyPrimitive(prim, { simplifier: MeshoptSimplifier, ratio: limit / tris, error: 0.01 });
+      if (tris > limit) simplifyPrimitive(prim, { simplifier: MeshoptSimplifier, ratio: limit / tris, error: 0.02 });
     }
   }
   if (smooth) await doc.transform(normals({ overwrite: true }));
@@ -85,7 +99,11 @@ async function anatomy(id, { materials, meshes, clipTo, clipPad = 0.15, maxTris,
     return [k, mat];
   }));
   const raw = {};
-  for (const [name, fma] of Object.entries(meshes)) raw[name] = parseStl(await fetchCached(`${BP3D}FMA${fma[0]}.stl`, `FMA${fma[0]}.stl`));
+  await pool(Object.entries(meshes), 8, async ([name, [fma]]) => {
+    const file = String(fma).startsWith('BP') ? fma : `FMA${fma}`;
+    raw[name] = parseStl(await fetchCached(`${BP3D}${file}.stl`, `${file}.stl`));
+  });
+  budgets = { ...budgets, ...Object.fromEntries(Object.entries(meshes).filter(([, m]) => m[2]).map(([n, m]) => [n, m[2]])) };
   const box = clipTo ? bounds(raw[clipTo], clipPad) : null;
   for (const [name, [, matName]] of Object.entries(meshes)) {
     const pos = box ? clip(raw[name], box) : raw[name];
@@ -97,7 +115,25 @@ async function anatomy(id, { materials, meshes, clipTo, clipPad = 0.15, maxTris,
   await save(doc, id, maxTris, true, budgets);
 }
 
-await anatomy('heart', {
+// pick BodyParts3D meshes by English name: { group: [regex, material, maxTris] } -> nodes "group__slug"
+let bp3dIndex;
+async function byName(groups) {
+  if (!bp3dIndex) {
+    const tree = JSON.parse(await fetchCached('https://api.github.com/repos/Kevin-Mattheus-Moerman/BodyParts3D/git/trees/main?recursive=1', 'bp3d-tree.json'));
+    const files = new Set(tree.tree.filter((x) => x.path.endsWith('.stl')).map((x) => x.path.split('/').pop().slice(0, -4)));
+    const list = (await fetchCached('https://raw.githubusercontent.com/Kevin-Mattheus-Moerman/BodyParts3D/main/assets/BodyParts3D_data/parts_list_e.txt', 'bp3d-parts.txt')).toString('utf8');
+    bp3dIndex = list.split('\n').map((l) => l.trim().split('\t')).filter(([id, n]) => n && files.has(id));
+  }
+  const meshes = {};
+  for (const [group, [re, mat, tris]] of Object.entries(groups)) {
+    const hits = bp3dIndex.filter(([, n]) => re.test(n));
+    if (!hits.length) throw new Error(`no meshes for ${group}`);
+    for (const [id, n] of hits) meshes[`${group}__${n.replace(/[^a-z0-9]+/gi, '_')}`] = [id.replace(/^FMA/, ''), mat, tris];
+  }
+  return meshes;
+}
+
+if (want('heart')) await anatomy('heart', {
   clipTo: 'heart_wall',
   maxTris: 12000,
   budgets: { heart_wall: 60000 },
@@ -120,7 +156,7 @@ await anatomy('heart', {
 });
 
 const bone = { color: 0xe6dcc6, rough: 0.6, coat: 0.1 };
-await anatomy('skull', {
+if (want('skull')) await anatomy('skull', {
   maxTris: 16000,
   materials: { bone, jaw: { ...bone, color: 0xe0d3b8 }, face: { ...bone, color: 0xe9e0cc } },
   meshes: {
@@ -131,7 +167,7 @@ await anatomy('skull', {
   },
 });
 
-await anatomy('lungs', {
+if (want('lungs')) await anatomy('lungs', {
   maxTris: 30000,
   materials: { lung: { color: 0xd98f8a, rough: 0.55, coat: 0.35 }, lung2: { color: 0xcf8580, rough: 0.55, coat: 0.35 }, airway: { color: 0xe8d2c2, rough: 0.5, coat: 0.3 } },
   meshes: {
@@ -140,8 +176,77 @@ await anatomy('lungs', {
   },
 });
 
+if (want('brain')) await anatomy('brain', {
+  maxTris: 3000,
+  materials: {
+    cortex: { color: 0xd9a7a0, rough: 0.6, coat: 0.25 }, cortex2: { color: 0xcf9a93, rough: 0.6, coat: 0.25 },
+    deep: { color: 0xb98a7c, rough: 0.55, coat: 0.2 }, white: { color: 0xeee6dc, rough: 0.55, coat: 0.2 },
+    stem: { color: 0xc99486, rough: 0.55, coat: 0.25 }, gland: { color: 0xc77f6f, rough: 0.5, coat: 0.3 },
+  },
+  meshes: await byName({
+    frontal_lobe: [/^(left|right) (superior frontal|middle frontal|precentral) gyrus$|^orbital gyri/, 'cortex'],
+    parietal_lobe: [/^(left|right) (postcentral|supramarginal|angular) gyrus$/, 'cortex2'],
+    temporal_lobe: [/superior temporal gyrus$|^(left|right) (middle temporal|inferior temporal|fusiform) gyrus$/, 'cortex2'],
+    occipital_lobe: [/^(left|right) occipital lobe$/, 'cortex'],
+    insula: [/^(left|right) (insula|accessory short gyrus)$/, 'cortex'],
+    limbic_system: [/^(left|right) (cingulate gyrus|parahippocampal gyrus|hippocampus|amygdala|fornix of forebrain)$|^commissure of fornix/, 'deep'],
+    corpus_callosum: [/^corpus callosum$/, 'white', 6000],
+    thalamus: [/^(left|right) (thalamus|stria medullaris of thalamus)$/, 'deep'],
+    basal_ganglia: [/^(left|right) (caudate nucleus|putamen)$/, 'deep'],
+    hypothalamus: [/^hypothalamus/, 'gland'],
+    pituitary_gland: [/^pituitary gland$/, 'gland'],
+    optic_chiasm: [/^optic chiasm$/, 'white'],
+    brainstem: [/^(midbrain|peduncle of midbrain|pons|medulla oblongata)/, 'stem', 5000],
+    cerebellum: [/^cerebellum$/, 'stem', 16000],
+  }),
+});
+
+if (want('abdomen')) await anatomy('abdomen', {
+  maxTris: 12000,
+  materials: {
+    liver: { color: 0x7a2e26, rough: 0.45, coat: 0.5 }, organ: { color: 0xb5564a, rough: 0.5, coat: 0.45 }, gut: { color: 0xd99a86, rough: 0.5, coat: 0.45 },
+    kidney: { color: 0x8e3a32, rough: 0.45, coat: 0.5 }, green: { color: 0x5f7a3a, rough: 0.45, coat: 0.5 }, gland: { color: 0xd2a35a, rough: 0.5, coat: 0.4 },
+    pale: { color: 0xe3c6a8, rough: 0.5, coat: 0.4 },
+  },
+  meshes: await byName({
+    liver: [/^liver$/, 'liver', 20000], stomach: [/^stomach$/, 'organ'], spleen: [/^spleen$/, 'kidney'],
+    pancreas: [/^pancreas/, 'gland'], gallbladder: [/^gallbladder$/, 'green'], kidneys: [/^(left|right) kidney$/, 'kidney'],
+    adrenal_glands: [/^(left|right) adrenal gland$/, 'gland'], ureters: [/^(left|right) ureter$/, 'pale'], urinary_bladder: [/^urinary bladder$/, 'pale'],
+    esophagus: [/^esophagus$/, 'organ'], duodenum: [/^duodenum$/, 'gut'], small_intestine: [/^(jejunum|ileum)$/, 'gut', 16000],
+    large_intestine: [/^(colon|appendix|rectum)/, 'gut', 16000],
+  }),
+});
+
+if (want('skeleton')) {
+  const side = '^(left|right) ';
+  await anatomy('skeleton', {
+    maxTris: 900,
+    materials: { bone: { color: 0xe6dcc6, rough: 0.6, coat: 0.1 }, disc: { color: 0x9fb6c9, rough: 0.5, coat: 0.2 } },
+    meshes: await byName({
+      skull: [/^(frontal bone|occipital bone|sphenoid bone|ethmoid|vomer|mandible|hyoid bone)$|^(left|right) (parietal bone|temporal bone|zygomatic bone|maxilla|nasal bone|lacrimal bone|palatine bone)$/, 'bone', 1800],
+      cervical_spine: [/^[a-z]+ cervical vertebra$|^(atlas|axis)$/, 'bone'],
+      thoracic_spine: [/^[a-z]+ thoracic vertebra$/, 'bone'],
+      lumbar_spine: [/^[a-z]+ lumbar vertebra$/, 'bone'],
+      intervertebral_discs: [/^intervertebral disk of/, 'disc', 300],
+      sacrum: [/^sacrum$/, 'bone', 3000],
+      ribs: [new RegExp(`${side}\\w+ rib$`), 'bone'],
+      sternum: [/^(body of sternum|manubrium|xiphoid process)$/, 'bone'],
+      clavicles: [new RegExp(`${side}clavicle$`), 'bone'],
+      scapulae: [new RegExp(`${side}scapula$`), 'bone', 2500],
+      humerus: [new RegExp(`${side}humerus$`), 'bone', 2500],
+      forearm: [new RegExp(`${side}(radius|ulna)$`), 'bone', 2000],
+      hands: [/^(left|right) (scaphoid|lunate|triquetral|pisiform|trapezium|trapezoid|capitate|hamate)$|metacarpal bone$|phalanx of (left|right) (thumb|\w+ finger)$/, 'bone', 250],
+      pelvis: [new RegExp(`${side}hip bone$`), 'bone', 4000],
+      femur: [new RegExp(`${side}femur$`), 'bone', 3000],
+      patella: [new RegExp(`${side}patella$`), 'bone'],
+      lower_leg: [new RegExp(`${side}(tibia|fibula)$`), 'bone', 2500],
+      feet: [/^(left|right) (talus|calcaneus|cuboid bone|\w+ cuneiform bone)$|^navicular bone of|metatarsal bone$|phalanx of (left|right) \w+ toe$|^sesamoid bone of/, 'bone', 250],
+    }),
+  });
+}
+
 // ---------- Solar system: textured spheres (textures: Solar System Scope, CC BY 4.0) ----------
-{
+if (want('solar-system')) {
   const TEX = 'https://www.solarsystemscope.com/textures/download/';
   const bodies = [
     ['sun', 2.2, 0, '2k_sun.jpg'], ['mercury', 0.2, 3.4, '2k_mercury.jpg'], ['venus', 0.34, 4.3, '2k_venus_atmosphere.jpg'],
@@ -188,5 +293,5 @@ async function khronos(id, name, size = 1024) {
   await doc.transform(textureCompress({ encoder: sharp, targetFormat: 'webp', resize: [size, size], quality: 82 }));
   await save(doc, id, 200000);
 }
-await khronos('concept-car', 'CarConcept');
-await khronos('chronograph-watch', 'ChronographWatch');
+if (want('concept-car')) await khronos('concept-car', 'CarConcept');
+if (want('chronograph-watch')) await khronos('chronograph-watch', 'ChronographWatch');
