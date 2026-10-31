@@ -1,0 +1,147 @@
+{
+  "frontal_lobe": {
+    "name": "Frontal Lobe",
+    "shell": true,
+    "meshes": ["frontal_lobe__*"],
+    "description": "The front part of each cerebral hemisphere. It handles planning, decision-making, personality and voluntary movement. The gyri shown here are the superior and middle frontal gyri, the precentral gyrus and the orbital gyri.",
+    "facts": [
+      "The precentral gyrus is the primary motor cortex, which controls voluntary movement.",
+      "The prefrontal cortex, at the very front, is involved in planning and self-control.",
+      "In most people, Broca's area in the left frontal lobe helps produce speech.",
+      "Separated from the parietal lobe by the central sulcus."
+    ]
+  },
+  "parietal_lobe": {
+    "name": "Parietal Lobe",
+    "shell": true,
+    "meshes": ["parietal_lobe__*"],
+    "description": "The upper middle part of each hemisphere. It processes touch, temperature and pain and helps with spatial awareness. Shown here: the postcentral, supramarginal and angular gyri.",
+    "facts": [
+      "The postcentral gyrus is the primary somatosensory cortex, which receives touch signals from the body.",
+      "Helps judge where the body and objects are in space.",
+      "The angular gyrus is involved in reading and understanding language."
+    ]
+  },
+  "temporal_lobe": {
+    "name": "Temporal Lobe",
+    "shell": true,
+    "meshes": ["temporal_lobe__*"],
+    "description": "The lower side part of each hemisphere, near the ears. It processes hearing, language and memory. Shown here: the superior, middle and inferior temporal gyri and the fusiform gyrus.",
+    "facts": [
+      "The primary auditory cortex, which processes sound, is in the superior temporal gyrus.",
+      "In most people, Wernicke's area in the left temporal lobe helps understand language.",
+      "The fusiform gyrus is involved in recognising faces."
+    ]
+  },
+  "occipital_lobe": {
+    "name": "Occipital Lobe",
+    "shell": true,
+    "meshes": ["occipital_lobe__*"],
+    "description": "The back part of each hemisphere. It is the brain's main centre for vision.",
+    "facts": [
+      "Contains the primary visual cortex.",
+      "The left occipital lobe processes what we see on the right side, and the other way round.",
+      "Damage here can cause loss of part of the visual field."
+    ]
+  },
+  "insula": {
+    "name": "Insula",
+    "meshes": ["insula__*"],
+    "description": "A region of cortex folded deep inside the lateral sulcus, hidden under the frontal, parietal and temporal lobes.",
+    "facts": [
+      "Involved in sensing the body's internal state, such as heartbeat and hunger.",
+      "Plays a role in taste and in emotions such as disgust.",
+      "Turn on X-ray to see it beneath the outer lobes."
+    ]
+  },
+  "limbic_system": {
+    "name": "Limbic System",
+    "meshes": ["limbic_system__*"],
+    "description": "A group of structures involved in memory and emotion. Shown here: the cingulate and parahippocampal gyri, hippocampus, amygdala and fornix.",
+    "facts": [
+      "The hippocampus is essential for forming new memories.",
+      "The amygdala helps process emotions, especially fear.",
+      "The fornix is a bundle of nerve fibres that carries signals out of the hippocampus.",
+      "The hippocampus is named after the Greek word for seahorse because of its shape."
+    ]
+  },
+  "corpus_callosum": {
+    "name": "Corpus Callosum",
+    "meshes": ["corpus_callosum__*"],
+    "description": "A thick band of nerve fibres that connects the left and right cerebral hemispheres.",
+    "facts": [
+      "It is the largest bundle of white matter in the brain.",
+      "Contains about 200 million nerve fibres.",
+      "Lets the two hemispheres share information."
+    ]
+  },
+  "thalamus": {
+    "name": "Thalamus",
+    "meshes": ["thalamus__*"],
+    "description": "A pair of egg-shaped structures deep in the brain that relay sensory and motor signals to the cortex.",
+    "facts": [
+      "Almost all sensory information except smell passes through the thalamus on its way to the cortex.",
+      "Also plays a role in sleep, alertness and consciousness.",
+      "There is one thalamus in each hemisphere."
+    ]
+  },
+  "basal_ganglia": {
+    "name": "Basal Ganglia",
+    "meshes": ["basal_ganglia__*"],
+    "description": "Groups of nerve cells deep in the brain that help control movement and habits. Shown here: the caudate nucleus and putamen.",
+    "facts": [
+      "Help start wanted movements and stop unwanted ones.",
+      "Parkinson's disease affects the circuits of the basal ganglia.",
+      "The caudate nucleus and putamen together form the striatum."
+    ]
+  },
+  "hypothalamus": {
+    "name": "Hypothalamus",
+    "meshes": ["hypothalamus__*"],
+    "description": "A small region below the thalamus that controls body temperature, hunger, thirst and sleep, and links the nervous system to the hormone system.",
+    "facts": [
+      "Controls the pituitary gland.",
+      "Acts like the body's thermostat.",
+      "Is about the size of an almond."
+    ]
+  },
+  "pituitary_gland": {
+    "name": "Pituitary Gland",
+    "meshes": ["pituitary_gland__*"],
+    "description": "A pea-sized gland below the hypothalamus that releases hormones controlling growth, metabolism and other glands.",
+    "facts": [
+      "Often called the master gland because it controls several other hormone glands.",
+      "Sits in a hollow of the sphenoid bone called the sella turcica.",
+      "Releases growth hormone among many others."
+    ]
+  },
+  "optic_chiasm": {
+    "name": "Optic Chiasm",
+    "meshes": ["optic_chiasm__*"],
+    "description": "The X-shaped place where the optic nerves from the two eyes meet and partly cross.",
+    "facts": [
+      "Fibres from the inner half of each retina cross to the other side here.",
+      "Lies just in front of the pituitary gland."
+    ]
+  },
+  "brainstem": {
+    "name": "Brainstem",
+    "meshes": ["brainstem__*"],
+    "description": "The stalk connecting the brain to the spinal cord, made of the midbrain, pons and medulla oblongata. It controls automatic functions such as breathing and heart rate.",
+    "facts": [
+      "The medulla oblongata helps control breathing, heart rate and blood pressure.",
+      "The pons relays signals between the cerebrum and the cerebellum.",
+      "Most cranial nerves come out of the brainstem."
+    ]
+  },
+  "cerebellum": {
+    "name": "Cerebellum",
+    "meshes": ["cerebellum__*"],
+    "description": "The 'little brain' at the back, below the cerebrum. It coordinates movement, balance and posture.",
+    "facts": [
+      "Contains more than half of the brain's neurons, though it is only about 10% of its volume.",
+      "Helps make movements smooth and accurate.",
+      "Involved in learning motor skills such as riding a bike."
+    ]
+  }
+}
