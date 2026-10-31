@@ -1,0 +1,138 @@
+{
+  "right_atrium": {
+    "name": "Right Atrium",
+    "description": "Upper-right chamber that receives oxygen-poor blood returning from the body and passes it to the right ventricle.",
+    "facts": [
+      "Receives blood from the superior and inferior venae cavae and the coronary sinus.",
+      "Contains the sinoatrial (SA) node, the heart's natural pacemaker.",
+      "Empties into the right ventricle through the tricuspid valve.",
+      "Has thin muscular walls because it only pumps blood a short distance."
+    ]
+  },
+  "left_atrium": {
+    "name": "Left Atrium",
+    "description": "Upper-left chamber that receives oxygen-rich blood from the lungs and passes it to the left ventricle.",
+    "facts": [
+      "Receives blood from the four pulmonary veins.",
+      "Empties into the left ventricle through the mitral valve.",
+      "Sits at the back of the heart, close to the oesophagus.",
+      "Atrial fibrillation often starts near where the pulmonary veins join it."
+    ]
+  },
+  "right_ventricle": {
+    "name": "Right Ventricle",
+    "description": "Lower-right chamber that pumps oxygen-poor blood through the pulmonary valve into the pulmonary trunk and on to the lungs.",
+    "facts": [
+      "Forms most of the front (anterior) surface of the heart.",
+      "Its wall is thinner than the left ventricle's because the lung circulation has lower pressure.",
+      "Receives blood from the right atrium through the tricuspid valve.",
+      "Pumps into the pulmonary circulation."
+    ]
+  },
+  "left_ventricle": {
+    "name": "Left Ventricle",
+    "description": "Lower-left chamber and the heart's main pumping chamber; it pushes oxygen-rich blood through the aortic valve into the aorta and the whole body.",
+    "facts": [
+      "Has the thickest muscular wall of the four chambers, often around 1 cm in adults.",
+      "Forms the apex (pointed tip) of the heart.",
+      "Receives blood from the left atrium through the mitral valve.",
+      "The share of blood it ejects per beat is the ejection fraction; about 50-70% is typical in healthy adults."
+    ]
+  },
+  "aorta": {
+    "name": "Aorta",
+    "description": "The body's largest artery. It carries oxygen-rich blood from the left ventricle to the rest of the body.",
+    "facts": [
+      "Starts at the aortic valve and rises as the ascending aorta.",
+      "Curves over as the aortic arch, which gives off branches to the head and arms.",
+      "Continues down through the chest and abdomen as the descending aorta.",
+      "The coronary arteries branch from its root, just above the aortic valve.",
+      "In adults it is roughly 2.5-3 cm wide near the heart."
+    ]
+  },
+  "pulmonary_trunk": {
+    "name": "Pulmonary Trunk",
+    "description": "Short, wide artery leaving the right ventricle that splits into the left and right pulmonary arteries, carrying oxygen-poor blood to the lungs.",
+    "facts": [
+      "One of the few arteries that carries oxygen-poor blood.",
+      "Begins at the pulmonary valve.",
+      "Divides into the right and left pulmonary arteries, one for each lung.",
+      "Shown in blue here by the common teaching convention for oxygen-poor blood."
+    ]
+  },
+  "superior_vena_cava": {
+    "name": "Superior Vena Cava",
+    "description": "Large vein that returns oxygen-poor blood from the head, neck, arms and upper chest to the right atrium.",
+    "facts": [
+      "Formed where the left and right brachiocephalic veins join.",
+      "Has no valve where it enters the right atrium.",
+      "Drains blood from the upper half of the body."
+    ]
+  },
+  "inferior_vena_cava": {
+    "name": "Inferior Vena Cava",
+    "description": "The largest vein in the body; it returns oxygen-poor blood from the legs, abdomen and pelvis to the right atrium.",
+    "facts": [
+      "Runs up the abdomen to the right of the aorta.",
+      "Passes through the diaphragm before entering the right atrium.",
+      "Drains blood from the lower half of the body."
+    ]
+  },
+  "pulmonary_veins": {
+    "name": "Pulmonary Veins",
+    "description": "Veins that carry oxygen-rich blood from the lungs back to the left atrium.",
+    "facts": [
+      "There are usually four: two from each lung.",
+      "They are the only veins in adults that carry oxygen-rich blood.",
+      "They have no valves where they enter the left atrium."
+    ]
+  },
+  "tricuspid_valve": {
+    "name": "Tricuspid Valve",
+    "description": "Valve between the right atrium and right ventricle that stops blood flowing back into the atrium when the ventricle contracts.",
+    "facts": [
+      "Usually has three leaflets (cusps), which gives it its name.",
+      "Its leaflets are held by chordae tendineae attached to papillary muscles.",
+      "It is an atrioventricular (AV) valve, like the mitral valve."
+    ]
+  },
+  "mitral_valve": {
+    "name": "Mitral Valve",
+    "description": "Valve between the left atrium and left ventricle that stops blood flowing back into the atrium when the ventricle contracts.",
+    "facts": [
+      "Has two leaflets, so it is also called the bicuspid valve.",
+      "Named after a bishop's mitre because of its shape.",
+      "Its closing is part of the first heart sound ('lub').",
+      "In mitral valve prolapse the leaflets bulge back into the atrium."
+    ]
+  },
+  "aortic_valve": {
+    "name": "Aortic Valve",
+    "description": "Valve between the left ventricle and the aorta that lets blood out to the body and stops it flowing back into the ventricle.",
+    "facts": [
+      "Normally has three semilunar cusps.",
+      "About 1-2% of people are born with a bicuspid (two-cusp) aortic valve.",
+      "Its closing is part of the second heart sound ('dub').",
+      "Narrowing of this valve is called aortic stenosis."
+    ]
+  },
+  "pulmonary_valve": {
+    "name": "Pulmonary Valve",
+    "description": "Valve between the right ventricle and the pulmonary trunk that lets blood out to the lungs and stops it flowing back.",
+    "facts": [
+      "Has three semilunar cusps, like the aortic valve.",
+      "Its closing also contributes to the second heart sound.",
+      "It works at lower pressure than the aortic valve."
+    ]
+  },
+  "coronary_arteries": {
+    "name": "Coronary Arteries",
+    "description": "Arteries running over the heart's surface that supply the heart muscle itself with oxygen-rich blood.",
+    "facts": [
+      "The left and right coronary arteries branch from the root of the aorta.",
+      "The left anterior descending (LAD) artery runs down the front of the heart between the ventricles.",
+      "Blockage of a coronary artery can cause a heart attack (myocardial infarction).",
+      "They fill mainly while the heart muscle relaxes (diastole)."
+    ]
+  }
+}

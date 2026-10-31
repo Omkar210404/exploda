@@ -1,0 +1,61 @@
+{
+  "categories": [
+    {
+      "id": "medical",
+      "name": "Medical / Human Body",
+      "models": [
+        {
+          "id": "heart",
+          "name": "Human Heart",
+          "folder": "heart",
+          "file": "model.glb",
+          "parts": "parts.json",
+          "description": "Chambers, valves and great vessels of the heart.",
+          "credit": { "author": "Exploda (built in code)", "license": "MIT" }
+        }
+      ]
+    },
+    {
+      "id": "automotive",
+      "name": "Automotive",
+      "models": [
+        {
+          "id": "engine",
+          "name": "Inline-4 Engine",
+          "folder": "engine",
+          "file": "model.glb",
+          "parts": "parts.json",
+          "description": "Cutaway of a four-stroke, four-cylinder petrol engine.",
+          "credit": { "author": "Exploda (built in code)", "license": "MIT" }
+        }
+      ]
+    },
+    {
+      "id": "science",
+      "name": "Science",
+      "models": [
+        {
+          "id": "solar-system",
+          "name": "Solar System",
+          "folder": "solar-system",
+          "file": "model.glb",
+          "parts": "parts.json",
+          "description": "The Sun and eight planets. Sizes and distances are not to scale.",
+          "credit": { "author": "Exploda (built in code)", "license": "MIT" }
+        }
+      ]
+    },
+    {
+      "id": "other",
+      "name": "Other",
+      "models": [
+        {
+          "id": "coming-soon",
+          "name": "More models coming soon",
+          "comingSoon": true,
+          "description": "Add a folder in public/models and one entry here."
+        }
+      ]
+    }
+  ]
+}
