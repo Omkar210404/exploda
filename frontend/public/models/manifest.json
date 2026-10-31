@@ -30,6 +30,33 @@
           "parts": "parts.json",
           "description": "Five lung lobes, the trachea and the bronchi.",
           "credit": { "author": "BodyParts3D, (c) The Database Center for Life Science", "license": "CC BY-SA 2.1 JP", "url": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html" }
+        },
+        {
+          "id": "brain",
+          "name": "Human Brain",
+          "folder": "brain",
+          "file": "model.glb",
+          "parts": "parts.json",
+          "description": "Lobes, limbic system, deep structures, brainstem and cerebellum. Try X-ray.",
+          "credit": { "author": "BodyParts3D, (c) The Database Center for Life Science", "license": "CC BY-SA 2.1 JP", "url": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html" }
+        },
+        {
+          "id": "abdomen",
+          "name": "Abdominal Organs",
+          "folder": "abdomen",
+          "file": "model.glb",
+          "parts": "parts.json",
+          "description": "Liver, stomach, kidneys, intestines and more. Try X-ray.",
+          "credit": { "author": "BodyParts3D, (c) The Database Center for Life Science", "license": "CC BY-SA 2.1 JP", "url": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html" }
+        },
+        {
+          "id": "skeleton",
+          "name": "Human Skeleton",
+          "folder": "skeleton",
+          "file": "model.glb",
+          "parts": "parts.json",
+          "description": "Over 200 bones grouped into 18 regions, from skull to feet.",
+          "credit": { "author": "BodyParts3D, (c) The Database Center for Life Science", "license": "CC BY-SA 2.1 JP", "url": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html" }
         }
       ]
     },
