@@ -1,0 +1,116 @@
+{
+  "categories": [
+    {
+      "id": "medical",
+      "name": "Medical / Human Body",
+      "models": [
+        {
+          "id": "heart",
+          "name": "Human Heart",
+          "folder": "heart",
+          "file": "model.glb",
+          "parts": "parts.json",
+          "description": "Real anatomy: heart wall, valves, great vessels and coronary circulation.",
+          "credit": { "author": "BodyParts3D, (c) The Database Center for Life Science", "license": "CC BY-SA 2.1 JP", "url": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html" }
+        },
+        {
+          "id": "skull",
+          "name": "Human Skull",
+          "folder": "skull",
+          "file": "model.glb",
+          "parts": "parts.json",
+          "description": "The cranial and facial bones, the jaw and the hyoid.",
+          "credit": { "author": "BodyParts3D, (c) The Database Center for Life Science", "license": "CC BY-SA 2.1 JP", "url": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html" }
+        },
+        {
+          "id": "lungs",
+          "name": "Lungs and Airways",
+          "folder": "lungs",
+          "file": "model.glb",
+          "parts": "parts.json",
+          "description": "Five lung lobes, the trachea and the bronchi.",
+          "credit": { "author": "BodyParts3D, (c) The Database Center for Life Science", "license": "CC BY-SA 2.1 JP", "url": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html" }
+        },
+        {
+          "id": "brain",
+          "name": "Human Brain",
+          "folder": "brain",
+          "file": "model.glb",
+          "parts": "parts.json",
+          "description": "Lobes, limbic system, deep structures, brainstem and cerebellum. Try X-ray.",
+          "credit": { "author": "BodyParts3D, (c) The Database Center for Life Science", "license": "CC BY-SA 2.1 JP", "url": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html" }
+        },
+        {
+          "id": "abdomen",
+          "name": "Abdominal Organs",
+          "folder": "abdomen",
+          "file": "model.glb",
+          "parts": "parts.json",
+          "description": "Liver, stomach, kidneys, intestines and more. Try X-ray.",
+          "credit": { "author": "BodyParts3D, (c) The Database Center for Life Science", "license": "CC BY-SA 2.1 JP", "url": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html" }
+        },
+        {
+          "id": "skeleton",
+          "name": "Human Skeleton",
+          "folder": "skeleton",
+          "file": "model.glb",
+          "parts": "parts.json",
+          "description": "Over 200 bones grouped into 18 regions, from skull to feet.",
+          "credit": { "author": "BodyParts3D, (c) The Database Center for Life Science", "license": "CC BY-SA 2.1 JP", "url": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html" }
+        }
+      ]
+    },
+    {
+      "id": "automotive",
+      "name": "Automotive",
+      "models": [
+        {
+          "id": "concept-car",
+          "name": "Concept Car",
+          "folder": "concept-car",
+          "file": "model.glb",
+          "parts": "parts.json",
+          "description": "A two-seat concept car with a full interior. Try X-ray.",
+          "credit": { "author": "Eric Chadwick, Khronos glTF Sample Assets", "license": "CC BY 4.0", "url": "https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/CarConcept" }
+        }
+      ]
+    },
+    {
+      "id": "science",
+      "name": "Science",
+      "models": [
+        {
+          "id": "solar-system",
+          "name": "Solar System",
+          "folder": "solar-system",
+          "file": "model.glb",
+          "parts": "parts.json",
+          "stage": "space",
+          "description": "The Sun, eight planets and the Moon. Sizes and distances are not to scale.",
+          "credit": { "author": "Planet textures: Solar System Scope", "license": "CC BY 4.0", "url": "https://www.solarsystemscope.com/textures/" }
+        }
+      ]
+    },
+    {
+      "id": "other",
+      "name": "Other",
+      "models": [
+        {
+          "id": "chronograph-watch",
+          "name": "Chronograph Watch",
+          "folder": "chronograph-watch",
+          "file": "model.glb",
+          "parts": "parts.json",
+          "description": "A wrist chronograph: case, dial, hands, pushers and strap.",
+          "credit": { "author": "Eric Chadwick, Khronos glTF Sample Assets", "license": "CC BY 4.0", "url": "https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/ChronographWatch" }
+        },
+        {
+          "id": "coming-soon",
+          "name": "More models coming soon",
+          "comingSoon": true,
+          "description": "Add a folder in public/models and one entry here."
+        }
+      ]
+    }
+  ]
+}

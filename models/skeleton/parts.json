@@ -1,0 +1,182 @@
+{
+  "skull": {
+    "name": "Skull",
+    "meshes": ["skull__*"],
+    "description": "The bones of the head: the cranium that protects the brain, the facial bones and the lower jaw. Open the Human Skull model to explore each bone.",
+    "facts": [
+      "An adult skull is made of 22 bones (not counting the ear bones).",
+      "The mandible (lower jaw) is the only skull bone that moves freely.",
+      "Most skull bones are joined by fixed joints called sutures."
+    ]
+  },
+  "cervical_spine": {
+    "name": "Cervical Spine",
+    "meshes": ["cervical_spine__*"],
+    "description": "The seven vertebrae of the neck (C1-C7). They support the head and allow it to move.",
+    "facts": [
+      "C1 is called the atlas and holds up the skull.",
+      "C2 is called the axis; its peg (dens) lets the head turn side to side.",
+      "Small holes in these vertebrae carry the vertebral arteries."
+    ]
+  },
+  "thoracic_spine": {
+    "name": "Thoracic Spine",
+    "meshes": ["thoracic_spine__*"],
+    "description": "The twelve vertebrae of the upper and mid back (T1-T12). Each one joins a pair of ribs.",
+    "facts": [
+      "Every thoracic vertebra connects to ribs.",
+      "This part of the spine moves less than the neck or lower back.",
+      "It curves gently backwards (kyphosis)."
+    ]
+  },
+  "lumbar_spine": {
+    "name": "Lumbar Spine",
+    "meshes": ["lumbar_spine__*"],
+    "description": "The five large vertebrae of the lower back (L1-L5). They carry most of the upper body's weight.",
+    "facts": [
+      "The largest vertebrae in the spine.",
+      "A common place for back pain and slipped discs.",
+      "It curves gently forwards (lordosis)."
+    ]
+  },
+  "intervertebral_discs": {
+    "name": "Intervertebral Discs",
+    "meshes": ["intervertebral_discs__*"],
+    "description": "Cushions of cartilage between the vertebrae that absorb shock and let the spine bend.",
+    "facts": [
+      "Each disc has a tough outer ring and a soft jelly-like centre.",
+      "A 'slipped' or herniated disc is when the centre pushes out through the ring.",
+      "Discs lose water with age, which is one reason people get slightly shorter."
+    ]
+  },
+  "sacrum": {
+    "name": "Sacrum",
+    "meshes": ["sacrum__*"],
+    "description": "A triangular bone at the base of the spine, formed from five fused vertebrae. It joins the hip bones to form the pelvis.",
+    "facts": [
+      "Made of five vertebrae that fuse by early adulthood.",
+      "Joins each hip bone at a sacroiliac joint.",
+      "The small coccyx (tailbone) attaches below it; it is not shown in this model."
+    ]
+  },
+  "ribs": {
+    "name": "Ribs",
+    "meshes": ["ribs__*"],
+    "description": "Twelve pairs of curved bones that form the rib cage, protecting the heart and lungs and helping with breathing.",
+    "facts": [
+      "Ribs 1-7 are 'true ribs' that join the sternum directly through cartilage.",
+      "Ribs 8-10 join the sternum indirectly; ribs 11-12 are 'floating ribs'.",
+      "The rib cage moves up and out when we breathe in."
+    ]
+  },
+  "sternum": {
+    "name": "Sternum (Breastbone)",
+    "meshes": ["sternum__*"],
+    "description": "The flat bone in the middle of the chest. It has three parts: the manubrium, the body and the xiphoid process.",
+    "facts": [
+      "The ribs and collarbones attach to it.",
+      "Protects the heart.",
+      "CPR chest compressions are done on the lower half of the sternum."
+    ]
+  },
+  "clavicles": {
+    "name": "Clavicles (Collarbones)",
+    "meshes": ["clavicles__*"],
+    "description": "Two S-shaped bones that connect the shoulder blades to the sternum.",
+    "facts": [
+      "One of the most commonly broken bones.",
+      "Holds the shoulder away from the body so the arm can swing freely.",
+      "The only long bone that lies horizontally."
+    ]
+  },
+  "scapulae": {
+    "name": "Scapulae (Shoulder Blades)",
+    "meshes": ["scapulae__*"],
+    "description": "Two flat, triangular bones on the upper back that form the back of the shoulder joints.",
+    "facts": [
+      "The socket of the shoulder joint (glenoid cavity) is part of the scapula.",
+      "Held in place mostly by muscles, so they can slide over the ribs.",
+      "Seventeen muscles attach to each scapula."
+    ]
+  },
+  "humerus": {
+    "name": "Humerus",
+    "meshes": ["humerus__*"],
+    "description": "The long bone of the upper arm, from the shoulder to the elbow.",
+    "facts": [
+      "Its rounded head fits into the shoulder socket.",
+      "The 'funny bone' feeling comes from the ulnar nerve passing near its lower end.",
+      "The largest bone of the arm."
+    ]
+  },
+  "forearm": {
+    "name": "Radius and Ulna",
+    "meshes": ["forearm__*"],
+    "description": "The two bones of the forearm. The radius is on the thumb side and the ulna on the little-finger side.",
+    "facts": [
+      "The radius rotates around the ulna so the palm can turn up or down.",
+      "The ulna forms the point of the elbow (olecranon).",
+      "A broken wrist is often a fracture at the lower end of the radius."
+    ]
+  },
+  "hands": {
+    "name": "Hand and Wrist Bones",
+    "meshes": ["hands__*"],
+    "description": "The bones of the wrists and hands: 8 carpal bones, 5 metacarpals and 14 phalanges in each hand.",
+    "facts": [
+      "Each hand and wrist has 27 bones.",
+      "The thumb has two phalanges; each finger has three.",
+      "The scaphoid is the most commonly broken wrist bone."
+    ]
+  },
+  "pelvis": {
+    "name": "Pelvis (Hip Bones)",
+    "meshes": ["pelvis__*"],
+    "description": "The two hip bones, which form a ring with the sacrum. They support the upper body and hold the hip sockets.",
+    "facts": [
+      "Each hip bone forms from three bones that fuse: the ilium, ischium and pubis.",
+      "The hip socket (acetabulum) holds the head of the femur.",
+      "The female pelvis is usually wider and shallower than the male pelvis."
+    ]
+  },
+  "femur": {
+    "name": "Femur (Thigh Bone)",
+    "meshes": ["femur__*"],
+    "description": "The bone of the thigh, from the hip to the knee.",
+    "facts": [
+      "The longest and strongest bone in the body.",
+      "Its length is roughly a quarter of a person's height.",
+      "Its ball-shaped head forms the hip joint with the pelvis."
+    ]
+  },
+  "patella": {
+    "name": "Patella (Kneecap)",
+    "meshes": ["patella__*"],
+    "description": "A small triangular bone at the front of the knee.",
+    "facts": [
+      "The largest sesamoid bone, meaning it sits inside a tendon.",
+      "Improves the leverage of the thigh muscles when straightening the knee.",
+      "Protects the front of the knee joint."
+    ]
+  },
+  "lower_leg": {
+    "name": "Tibia and Fibula",
+    "meshes": ["lower_leg__*"],
+    "description": "The two bones of the lower leg. The tibia (shin bone) carries the weight; the thinner fibula runs beside it.",
+    "facts": [
+      "The tibia is the second-longest bone in the body.",
+      "The fibula carries little weight but anchors muscles and helps form the ankle.",
+      "The bumps on each side of the ankle are the ends of the tibia and fibula."
+    ]
+  },
+  "feet": {
+    "name": "Foot and Ankle Bones",
+    "meshes": ["feet__*"],
+    "description": "The bones of the ankles and feet: 7 tarsal bones, 5 metatarsals and 14 phalanges in each foot, plus small sesamoid bones.",
+    "facts": [
+      "Each foot has 26 main bones.",
+      "The calcaneus (heel bone) is the largest bone of the foot.",
+      "The talus connects the foot to the tibia and fibula at the ankle."
+    ]
+  }
+}

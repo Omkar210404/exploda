@@ -1,0 +1,159 @@
+{
+  "body_panels": {
+    "name": "Body Panels",
+    "shell": true,
+    "meshes": ["BodyPanelsColor2", "BodyRearPanelsColor1", "BodyRoofPanel", "BodyPillars", "BodyUnderside"],
+    "description": "The outer skin of the car: roof, pillars, rear panels and underside. Panels shape the airflow and protect what is inside.",
+    "facts": [
+      "Body panels are usually made from steel, aluminium or composites such as carbon fibre.",
+      "The pillars (A, B, C) hold up the roof and help protect occupants in a rollover.",
+      "Turn on X-ray to see through the body to the engine and cabin."
+    ]
+  },
+  "hood": {
+    "name": "Hood (Bonnet)",
+    "shell": true,
+    "meshes": ["BodyHood*"],
+    "description": "The hinged front cover over the front compartment, including its grille and inner panels.",
+    "facts": [
+      "Called the bonnet in British English.",
+      "Gives access for servicing whatever sits under it.",
+      "Hoods are designed to crumple in a crash to help protect pedestrians."
+    ]
+  },
+  "doors": {
+    "name": "Doors",
+    "shell": true,
+    "meshes": ["BodyDoorL*", "BodyDoorR*", "InteriorDoor*"],
+    "description": "The two side doors with their windows, handles, mirrors and inner trim panels.",
+    "facts": [
+      "Each door here carries its own side mirror and window.",
+      "Doors usually contain side-impact beams to protect occupants.",
+      "The inner trim panels hide the window mechanism and wiring."
+    ]
+  },
+  "windshield": {
+    "name": "Windshield and Wipers",
+    "shell": true,
+    "meshes": ["BodyWindshield*"],
+    "description": "The front window, its rubber gasket and the wipers that clear it.",
+    "facts": [
+      "Windshields are made of laminated glass: two glass layers bonded to a plastic layer so it does not shatter into pieces.",
+      "The gasket seals the glass to the body.",
+      "Called the windscreen in British English."
+    ]
+  },
+  "rear_windows": {
+    "name": "Rear and Side Windows",
+    "shell": true,
+    "meshes": ["BodyRearwindow", "BodyWindowsRearSides"],
+    "description": "The rear window and the fixed side windows behind the doors.",
+    "facts": [
+      "Side and rear windows are usually tempered glass, which breaks into small blunt pieces.",
+      "Rear windows often have heating wires to clear frost and mist."
+    ]
+  },
+  "headlights": {
+    "name": "Headlights",
+    "meshes": ["BodyHeadlights"],
+    "description": "The front lamps that light the road ahead and make the car visible.",
+    "facts": [
+      "Have low beams for normal driving and high beams for dark, empty roads.",
+      "Modern cars mostly use LED headlights."
+    ]
+  },
+  "taillights": {
+    "name": "Taillights and Turn Signals",
+    "meshes": ["BodyTaillights*", "BodyTurnsignalsRear"],
+    "description": "The rear lamps: tail lights, brake lights and the rear turn signals.",
+    "facts": [
+      "Tail lights are red so following drivers can see the car at night.",
+      "Brake lights glow brighter when the brake pedal is pressed.",
+      "Turn signals flash amber (or red in some countries) to show a turn or lane change."
+    ]
+  },
+  "wheels": {
+    "name": "Wheels and Tyres",
+    "meshes": ["Wheel*"],
+    "description": "The four wheels: rims and tyres that carry the car and grip the road.",
+    "facts": [
+      "The tyre's contact patch is the only part of the car touching the road.",
+      "Rims are commonly made of aluminium alloy or steel.",
+      "Tyre tread channels water away to reduce the risk of aquaplaning."
+    ]
+  },
+  "brakes": {
+    "name": "Disc Brakes",
+    "meshes": ["Wheel*Brake*"],
+    "description": "Brake discs (rotors) and brake pads behind each wheel that slow the car using friction.",
+    "facts": [
+      "Pressing the pedal pushes the pads against the spinning disc.",
+      "Braking turns the car's movement energy into heat.",
+      "Discs often have vents or holes to help them cool."
+    ]
+  },
+  "axles": {
+    "name": "Axles",
+    "meshes": ["Axles"],
+    "description": "The shafts that connect the wheels and, on driven wheels, carry power from the drivetrain to them.",
+    "facts": [
+      "Driven axles transfer torque to the wheels.",
+      "Front axles on most cars must also allow the wheels to steer."
+    ]
+  },
+  "engine": {
+    "name": "Engine",
+    "meshes": ["Engine"],
+    "description": "The power unit of the car. This concept model shows it as a simplified block at the rear.",
+    "facts": [
+      "The model does not say what type of engine this is; it is shown as a simple block.",
+      "Placing the engine behind the seats is called a mid-engine or rear-engine layout, common in sports cars.",
+      "Turn on X-ray to see it through the body."
+    ]
+  },
+  "seats": {
+    "name": "Seats",
+    "meshes": ["InteriorSeats*"],
+    "description": "The two seats with their frames.",
+    "facts": [
+      "This concept car is a two-seater.",
+      "Seat frames are fixed to the floor and are part of the car's safety system."
+    ]
+  },
+  "steering": {
+    "name": "Steering Wheel and Column",
+    "meshes": ["InteriorSteering*"],
+    "description": "The steering wheel, its handles and emblem, and the column that connects it to the steering system.",
+    "facts": [
+      "Turning the wheel turns the front wheels through the steering column and rack.",
+      "In most modern cars the steering wheel holds the driver's front airbag."
+    ]
+  },
+  "dashboard": {
+    "name": "Dashboard",
+    "meshes": ["InteriorDash*"],
+    "description": "The panel in front of the seats that holds the instruments and controls.",
+    "facts": [
+      "Usually shows speed and warning lights to the driver.",
+      "Often contains the passenger airbag and air vents."
+    ]
+  },
+  "pedals": {
+    "name": "Pedals",
+    "meshes": ["InteriorPedal*"],
+    "description": "The accelerator and brake pedals with their arms.",
+    "facts": [
+      "This model has two pedals: accelerator (right) and brake (left), as in an automatic car.",
+      "Cars with a manual gearbox have a third pedal for the clutch."
+    ]
+  },
+  "roll_cage": {
+    "name": "Roll Cage",
+    "meshes": ["InteriorCage"],
+    "description": "A frame of tubes inside the cabin that protects occupants if the car rolls over.",
+    "facts": [
+      "Common in racing cars and some sports concepts.",
+      "Also stiffens the car's body structure."
+    ]
+  }
+}

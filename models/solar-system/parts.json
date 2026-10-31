@@ -1,0 +1,103 @@
+{
+  "sun": {
+    "name": "Sun",
+    "description": "The star at the centre of the Solar System. Its gravity holds the planets in orbit and its light and heat support life on Earth.",
+    "facts": [
+      "Holds about 99.8% of the Solar System's mass.",
+      "Is about 4.6 billion years old.",
+      "Produces energy by nuclear fusion of hydrogen into helium in its core.",
+      "Sunlight takes about 8 minutes 20 seconds to reach Earth.",
+      "Its diameter is about 109 times Earth's."
+    ]
+  },
+  "mercury": {
+    "name": "Mercury",
+    "description": "The smallest planet and the closest to the Sun.",
+    "facts": [
+      "Orbits the Sun once every 88 Earth days.",
+      "Has no moons.",
+      "Has almost no atmosphere, so temperatures swing from about 430 C by day to about -180 C at night."
+    ]
+  },
+  "venus": {
+    "name": "Venus",
+    "description": "The second planet from the Sun, similar in size to Earth but covered in thick clouds.",
+    "facts": [
+      "The hottest planet, with surface temperatures around 465 C.",
+      "Its atmosphere is mostly carbon dioxide with clouds of sulphuric acid.",
+      "Rotates backwards (retrograde) compared with most planets.",
+      "A day on Venus (243 Earth days) is longer than its year (225 Earth days).",
+      "Has no moons."
+    ]
+  },
+  "earth": {
+    "name": "Earth",
+    "description": "The third planet from the Sun and the only one known to support life.",
+    "facts": [
+      "About 71% of its surface is covered by water.",
+      "Has one natural satellite, the Moon.",
+      "Orbits the Sun at about 150 million km (1 astronomical unit).",
+      "One orbit takes about 365.25 days."
+    ]
+  },
+  "moon": {
+    "name": "Moon",
+    "description": "Earth's only natural satellite.",
+    "facts": [
+      "About 384,400 km from Earth on average.",
+      "Its diameter is about a quarter of Earth's.",
+      "Always shows the same side to Earth because it is tidally locked.",
+      "Humans first landed on it in 1969 (Apollo 11)."
+    ]
+  },
+  "mars": {
+    "name": "Mars",
+    "description": "The fourth planet, a cold desert world known as the Red Planet.",
+    "facts": [
+      "Its red colour comes from iron oxide (rust) in its dust.",
+      "Has two small moons, Phobos and Deimos.",
+      "Home to Olympus Mons, the largest known volcano in the Solar System.",
+      "A Martian day is about 24 hours 37 minutes."
+    ]
+  },
+  "jupiter": {
+    "name": "Jupiter",
+    "description": "The largest planet, a gas giant made mostly of hydrogen and helium.",
+    "facts": [
+      "More than twice as massive as all the other planets combined.",
+      "The Great Red Spot is a giant storm larger than Earth.",
+      "Has the shortest day of any planet, about 10 hours.",
+      "Its four largest moons, the Galilean moons, are Io, Europa, Ganymede and Callisto."
+    ]
+  },
+  "saturn": {
+    "name": "Saturn",
+    "description": "The sixth planet, a gas giant famous for its bright ring system.",
+    "facts": [
+      "Its rings are made mostly of ice particles with some rock.",
+      "Its average density is lower than water's.",
+      "Its largest moon, Titan, has a thick nitrogen atmosphere.",
+      "Takes about 29 Earth years to orbit the Sun."
+    ]
+  },
+  "uranus": {
+    "name": "Uranus",
+    "description": "The seventh planet, an ice giant that spins on its side.",
+    "facts": [
+      "Its axis is tilted about 98 degrees, so it rolls around the Sun on its side.",
+      "Methane in its atmosphere gives it a blue-green colour.",
+      "Was the first planet discovered with a telescope, by William Herschel in 1781.",
+      "Takes about 84 Earth years to orbit the Sun."
+    ]
+  },
+  "neptune": {
+    "name": "Neptune",
+    "description": "The eighth and farthest known planet from the Sun, a deep-blue ice giant.",
+    "facts": [
+      "Has the strongest winds measured in the Solar System, over 2,000 km/h.",
+      "Was found in 1846 using mathematical predictions.",
+      "Its largest moon, Triton, orbits backwards (retrograde).",
+      "Takes about 165 Earth years to orbit the Sun."
+    ]
+  }
+}

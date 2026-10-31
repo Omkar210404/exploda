@@ -1,0 +1,131 @@
+{
+  "frontal_bone": {
+    "name": "Frontal Bone",
+    "description": "The bone of the forehead. It forms the front of the skull and the roofs of the eye sockets.",
+    "facts": [
+      "Contains the frontal sinuses, air spaces above the eyes.",
+      "At birth it is in two halves that usually fuse in early childhood.",
+      "Meets the parietal bones at the coronal suture."
+    ]
+  },
+  "parietal_bones": {
+    "name": "Parietal Bones",
+    "meshes": ["parietal_*"],
+    "description": "A pair of bones that form the top and upper sides of the skull.",
+    "facts": [
+      "The two parietal bones meet in the midline at the sagittal suture.",
+      "They meet the occipital bone at the lambdoid suture.",
+      "They protect the upper part of the brain."
+    ]
+  },
+  "temporal_bones": {
+    "name": "Temporal Bones",
+    "meshes": ["temporal_*"],
+    "description": "A pair of bones on the sides and base of the skull, around the ears.",
+    "facts": [
+      "House the middle and inner ear, including the tiny ear bones.",
+      "Form the joint with the lower jaw (temporomandibular joint).",
+      "The mastoid process behind the ear is part of the temporal bone."
+    ]
+  },
+  "occipital_bone": {
+    "name": "Occipital Bone",
+    "description": "The bone at the back and base of the skull.",
+    "facts": [
+      "Has a large opening, the foramen magnum, where the spinal cord joins the brainstem.",
+      "Its occipital condyles form the joint with the first neck vertebra (atlas).",
+      "Protects the back of the brain, including the visual areas."
+    ]
+  },
+  "sphenoid_bone": {
+    "name": "Sphenoid Bone",
+    "description": "A butterfly-shaped bone in the middle of the skull base that links many other skull bones.",
+    "facts": [
+      "Touches every other bone of the cranium.",
+      "Contains the sella turcica, a hollow that holds the pituitary gland.",
+      "Forms part of the eye sockets and has the sphenoid sinuses inside."
+    ]
+  },
+  "ethmoid_bone": {
+    "name": "Ethmoid Bone",
+    "description": "A light, spongy bone between the eye sockets that forms part of the nasal cavity.",
+    "facts": [
+      "Its cribriform plate has small holes for the smell (olfactory) nerves.",
+      "Contains the ethmoid air cells (sinuses).",
+      "Forms the upper part of the nasal septum."
+    ]
+  },
+  "zygomatic_bones": {
+    "name": "Zygomatic Bones",
+    "meshes": ["zygomatic_*"],
+    "description": "The cheekbones. They form the prominence of the cheeks and part of the eye sockets.",
+    "facts": [
+      "Join the temporal bone to form the zygomatic arch.",
+      "Form the outer wall and floor of each eye socket.",
+      "Also called the malar bones."
+    ]
+  },
+  "maxillae": {
+    "name": "Maxillae (Upper Jaw)",
+    "meshes": ["maxilla_*"],
+    "description": "A pair of bones that fuse to form the upper jaw, holding the upper teeth.",
+    "facts": [
+      "Form most of the hard palate (roof of the mouth), together with the palatine bones.",
+      "Contain the maxillary sinuses, the largest of the paranasal sinuses.",
+      "Form part of the floor of the eye sockets and the walls of the nasal cavity."
+    ]
+  },
+  "nasal_bones": {
+    "name": "Nasal Bones",
+    "meshes": ["nasal_*"],
+    "description": "Two small bones that form the bridge of the nose.",
+    "facts": [
+      "The lower part of the nose is cartilage, not bone.",
+      "They are among the most commonly broken facial bones."
+    ]
+  },
+  "lacrimal_bones": {
+    "name": "Lacrimal Bones",
+    "meshes": ["lacrimal_*"],
+    "description": "The smallest bones of the face, in the inner wall of each eye socket.",
+    "facts": [
+      "Help form the channel that drains tears from the eye into the nose.",
+      "Each is about the size of a fingernail."
+    ]
+  },
+  "palatine_bones": {
+    "name": "Palatine Bones",
+    "meshes": ["palatine_*"],
+    "description": "L-shaped bones at the back of the nasal cavity that form the rear part of the hard palate.",
+    "facts": [
+      "Form the back part of the roof of the mouth.",
+      "Also help form the floor of the eye sockets and the walls of the nasal cavity."
+    ]
+  },
+  "vomer": {
+    "name": "Vomer",
+    "description": "A thin, flat bone that forms the lower and back part of the nasal septum.",
+    "facts": [
+      "Named after the Latin word for ploughshare because of its shape.",
+      "Divides the nasal cavity into left and right sides together with the ethmoid and cartilage."
+    ]
+  },
+  "mandible": {
+    "name": "Mandible (Lower Jaw)",
+    "description": "The lower jaw, the largest and strongest bone of the face and the only skull bone that moves freely.",
+    "facts": [
+      "Holds the lower teeth.",
+      "Forms the temporomandibular joint with the temporal bone on each side.",
+      "Its two halves fuse at the chin in the first year of life."
+    ]
+  },
+  "hyoid_bone": {
+    "name": "Hyoid Bone",
+    "description": "A U-shaped bone in the neck below the jaw that supports the tongue.",
+    "facts": [
+      "It does not touch any other bone; it is held in place by muscles and ligaments.",
+      "Helps with swallowing and speaking.",
+      "It is not part of the skull itself but is often studied with it."
+    ]
+  }
+}

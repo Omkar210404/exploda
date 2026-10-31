@@ -1,0 +1,137 @@
+{
+  "liver": {
+    "name": "Liver",
+    "shell": true,
+    "meshes": ["liver__*"],
+    "description": "The largest internal organ, in the upper right of the abdomen. It processes nutrients, makes bile, stores energy and breaks down toxins.",
+    "facts": [
+      "Weighs about 1.5 kg in adults.",
+      "Makes bile, which helps digest fats.",
+      "Can regrow lost tissue.",
+      "Receives blood from both the hepatic artery and the portal vein."
+    ]
+  },
+  "stomach": {
+    "name": "Stomach",
+    "meshes": ["stomach__*"],
+    "description": "A J-shaped muscular bag that stores food and starts digesting protein with acid and enzymes.",
+    "facts": [
+      "Produces hydrochloric acid and the enzyme pepsin.",
+      "Food enters from the oesophagus and leaves into the duodenum.",
+      "Its lining is protected from its own acid by a layer of mucus."
+    ]
+  },
+  "spleen": {
+    "name": "Spleen",
+    "meshes": ["spleen__*"],
+    "description": "An organ in the upper left of the abdomen that filters blood and helps fight infection.",
+    "facts": [
+      "Removes old and damaged red blood cells.",
+      "Stores white blood cells and platelets.",
+      "People can live without a spleen, but they are more prone to some infections."
+    ]
+  },
+  "pancreas": {
+    "name": "Pancreas",
+    "meshes": ["pancreas__*"],
+    "description": "A gland behind the stomach that makes digestive enzymes and the hormones insulin and glucagon.",
+    "facts": [
+      "Insulin and glucagon control blood sugar.",
+      "Its enzymes flow into the duodenum to digest food.",
+      "Diabetes is linked to problems with insulin."
+    ]
+  },
+  "gallbladder": {
+    "name": "Gallbladder",
+    "meshes": ["gallbladder__*"],
+    "description": "A small pear-shaped sac under the liver that stores and concentrates bile.",
+    "facts": [
+      "Releases bile into the duodenum after a fatty meal.",
+      "Hard deposits called gallstones can form inside it.",
+      "It can be removed; bile then flows straight from the liver."
+    ]
+  },
+  "kidneys": {
+    "name": "Kidneys",
+    "meshes": ["kidneys__*"],
+    "description": "Two bean-shaped organs at the back of the abdomen that filter blood and make urine.",
+    "facts": [
+      "Each kidney has about a million filtering units called nephrons.",
+      "Together they filter roughly 180 litres of blood plasma a day.",
+      "Also help control blood pressure and make hormones.",
+      "The right kidney usually sits a little lower than the left because of the liver."
+    ]
+  },
+  "adrenal_glands": {
+    "name": "Adrenal Glands",
+    "meshes": ["adrenal_glands__*"],
+    "description": "Small glands on top of each kidney that make hormones such as adrenaline and cortisol.",
+    "facts": [
+      "Adrenaline prepares the body for 'fight or flight'.",
+      "Cortisol helps control metabolism and the stress response.",
+      "Also called suprarenal glands."
+    ]
+  },
+  "ureters": {
+    "name": "Ureters",
+    "meshes": ["ureters__*"],
+    "description": "Two thin tubes that carry urine from the kidneys down to the bladder.",
+    "facts": [
+      "Each is about 25-30 cm long in adults.",
+      "Muscle waves (peristalsis) push urine along them.",
+      "Kidney stones can get stuck in them."
+    ]
+  },
+  "urinary_bladder": {
+    "name": "Urinary Bladder",
+    "meshes": ["urinary_bladder__*"],
+    "description": "A stretchy muscular bag in the pelvis that stores urine.",
+    "facts": [
+      "Receives urine from the two ureters.",
+      "Its wall muscle is called the detrusor.",
+      "The urge to urinate usually starts when it holds a few hundred millilitres."
+    ]
+  },
+  "esophagus": {
+    "name": "Oesophagus",
+    "meshes": ["esophagus__*"],
+    "description": "The muscular tube that carries food from the throat to the stomach. Only its lower end is shown here.",
+    "facts": [
+      "About 25 cm long in adults.",
+      "Moves food by waves of muscle contraction (peristalsis).",
+      "Passes through the diaphragm just before joining the stomach."
+    ]
+  },
+  "duodenum": {
+    "name": "Duodenum",
+    "meshes": ["duodenum__*"],
+    "description": "The first, C-shaped part of the small intestine, right after the stomach.",
+    "facts": [
+      "Receives bile and pancreatic enzymes.",
+      "About 25 cm long.",
+      "Most digestion of food happens here and in the rest of the small intestine."
+    ]
+  },
+  "small_intestine": {
+    "name": "Small Intestine",
+    "shell": true,
+    "meshes": ["small_intestine__*"],
+    "description": "The long, coiled tube where most food is digested and absorbed. Shown here: the jejunum and ileum.",
+    "facts": [
+      "The whole small intestine is several metres long.",
+      "Its inner surface is covered in tiny finger-like villi that absorb nutrients.",
+      "The ileum absorbs vitamin B12 and bile salts."
+    ]
+  },
+  "large_intestine": {
+    "name": "Large Intestine",
+    "shell": true,
+    "meshes": ["large_intestine__*"],
+    "description": "The final part of the gut, which absorbs water and forms stool. Shown here: the colon, appendix and rectum.",
+    "facts": [
+      "About 1.5 m long, wider but shorter than the small intestine.",
+      "Home to trillions of gut bacteria.",
+      "The appendix is a small pouch attached to the start of the colon."
+    ]
+  }
+}

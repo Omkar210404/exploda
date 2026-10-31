@@ -1,0 +1,65 @@
+{
+  "right_upper_lobe": {
+    "name": "Right Upper Lobe",
+    "description": "The top lobe of the right lung.",
+    "facts": [
+      "The right lung has three lobes: upper, middle and lower.",
+      "Separated from the middle lobe by the horizontal fissure.",
+      "Its tip (apex) rises slightly above the collarbone."
+    ]
+  },
+  "right_middle_lobe": {
+    "name": "Right Middle Lobe",
+    "description": "The smallest lobe of the right lung, at the front between the upper and lower lobes.",
+    "facts": [
+      "Only the right lung has a middle lobe.",
+      "Bounded by the horizontal fissure above and the oblique fissure below.",
+      "Lies next to the heart."
+    ]
+  },
+  "right_lower_lobe": {
+    "name": "Right Lower Lobe",
+    "description": "The bottom lobe of the right lung, resting on the diaphragm.",
+    "facts": [
+      "Separated from the other right lobes by the oblique fissure.",
+      "Rests on the dome of the diaphragm, which sits higher on the right because of the liver.",
+      "A common place for inhaled objects to end up, because the right main bronchus is more vertical."
+    ]
+  },
+  "left_upper_lobe": {
+    "name": "Left Upper Lobe",
+    "description": "The top lobe of the left lung.",
+    "facts": [
+      "The left lung has only two lobes, leaving room for the heart.",
+      "Has a notch for the heart called the cardiac notch.",
+      "Has a tongue-like part called the lingula, which matches the right middle lobe."
+    ]
+  },
+  "left_lower_lobe": {
+    "name": "Left Lower Lobe",
+    "description": "The bottom lobe of the left lung, resting on the diaphragm.",
+    "facts": [
+      "Separated from the upper lobe by the oblique fissure.",
+      "Rests on the left dome of the diaphragm."
+    ]
+  },
+  "trachea": {
+    "name": "Trachea (Windpipe)",
+    "description": "The tube that carries air from the larynx down into the chest, where it splits into the two main bronchi.",
+    "facts": [
+      "About 10-12 cm long and 2 cm wide in adults.",
+      "Kept open by about 16-20 C-shaped rings of cartilage.",
+      "Lined with cilia and mucus that trap dust and move it up towards the throat.",
+      "Splits into the left and right main bronchi at the carina."
+    ]
+  },
+  "bronchi": {
+    "name": "Bronchi",
+    "description": "The branching airways that carry air from the trachea into each lung.",
+    "facts": [
+      "The right main bronchus is shorter, wider and more vertical than the left.",
+      "They divide again and again into smaller bronchi and then bronchioles.",
+      "The smallest airways end in alveoli, tiny air sacs where oxygen passes into the blood."
+    ]
+  }
+}
