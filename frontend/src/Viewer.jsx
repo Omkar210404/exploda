@@ -1,6 +1,6 @@
 import { Component, Suspense, useEffect, useMemo, useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { Billboard, Bounds, ContactShadows, Environment, Html, OrbitControls, Stars, useGLTF, useProgress } from '@react-three/drei';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Billboard, Bounds, ContactShadows, Environment, Html, OrbitControls, Stars, useBounds, useGLTF, useProgress } from '@react-three/drei';
 import * as THREE from 'three';
 
 const GOLD = new THREE.Color('#f2b84b');
@@ -26,7 +26,28 @@ function partOf(obj, rules) {
   return null;
 }
 
-function Model({ url, parts, hovered, selected, onHover, onSelect, onMoreInfo, explode, hotspots, xray, stage, tooltip }) {
+// smoothly frames the selected part (with some context), or the whole model when nothing is selected
+function CameraFocus({ groups, selected, explode, enabled }) {
+  const bounds = useBounds();
+  const size = useThree((s) => s.size); // refit when the canvas resizes (e.g. chat panel opens)
+  const ready = useRef(false);
+  useEffect(() => {
+    if (!ready.current) { ready.current = true; return undefined; }
+    const t = setTimeout(() => {
+      const g = enabled && groups[selected];
+      if (!g) { bounds.refresh().clip().fit(); return; }
+      const box = g.box.clone().translate(g.dir.clone().multiplyScalar(explode * SPREAD));
+      const size = box.getSize(new THREE.Vector3());
+      const grow = (v) => Math.max(0, (1.6 - v) / 2);
+      box.expandByVector(new THREE.Vector3(grow(size.x), grow(size.y), grow(size.z)));
+      bounds.refresh(box).clip().fit();
+    }, 250);
+    return () => clearTimeout(t);
+  }, [bounds, groups, selected, explode, enabled, size.width, size.height]);
+  return null;
+}
+
+function Model({ url, parts, hovered, selected, onHover, onSelect, onMoreInfo, explode, hotspots, labels, quiz, xray, stage, tooltip }) {
   const { scene } = useGLTF(url);
 
   const { root, groups, floor } = useMemo(() => {
@@ -51,6 +72,10 @@ function Model({ url, parts, hovered, selected, onHover, onSelect, onMoreInfo, e
     for (const g of Object.values(groups)) {
       g.meshes.forEach((o) => g.box.expandByObject(o));
       g.center = g.box.getCenter(new THREE.Vector3());
+      // labels sit on the biggest piece, so paired parts (both kidneys) don't label the gap between them
+      const vol = (b) => { const v = b.getSize(new THREE.Vector3()); return v.x * v.y * v.z; };
+      const boxes = g.meshes.map((o) => new THREE.Box3().setFromObject(o));
+      g.anchor = boxes.reduce((a, b) => (vol(b) > vol(a) ? b : a)).getCenter(new THREE.Vector3());
       g.dir = g.center.lengthSq() > 0.02 ? g.center.clone() : new THREE.Vector3();
       for (const o of g.meshes) {
         // explode direction in the mesh's parent space, so nested/scaled nodes move correctly
@@ -86,7 +111,7 @@ function Model({ url, parts, hovered, selected, onHover, onSelect, onMoreInfo, e
     const k = amount.current * SPREAD;
     for (const [id, g] of Object.entries(groups)) {
       for (const o of g.meshes) o.position.copy(o.userData.basePos).addScaledVector(o.userData.dirLocal, k);
-      markers.current[id]?.position.copy(g.center).addScaledVector(g.dir, k);
+      markers.current[id]?.position.copy(g.anchor).addScaledVector(g.dir, k);
     }
   });
 
@@ -100,14 +125,15 @@ function Model({ url, parts, hovered, selected, onHover, onSelect, onMoreInfo, e
 
   return (
     <>
-      <Bounds fit clip observe margin={stage === 'space' ? 1.05 : 1.15}>
+      <Bounds fit clip margin={stage === 'space' ? 1.05 : 1.15}>
+      <CameraFocus groups={groups} selected={selected} explode={explode} enabled={!quiz} />
       <primitive
         object={root}
         onPointerMove={(e) => {
           e.stopPropagation();
           const id = e.object.userData.part;
           if (id !== hovered) onHover(id);
-          moveTip(e, id ? parts[id].name : '');
+          moveTip(e, id && !quiz ? parts[id].name : '');
           document.body.style.cursor = id ? 'pointer' : 'auto';
         }}
         onPointerOut={(e) => { onHover(null); moveTip(e, ''); document.body.style.cursor = 'auto'; }}
@@ -117,8 +143,13 @@ function Model({ url, parts, hovered, selected, onHover, onSelect, onMoreInfo, e
         }}
       />
       {Object.entries(groups).map(([id, g]) => (
-        <group key={id} ref={(el) => { markers.current[id] = el; }} position={g.center}>
-          {hotspots && id !== selected && (
+        <group key={id} ref={(el) => { markers.current[id] = el; }} position={g.anchor}>
+          {labels && !quiz && id !== selected && (
+            <Html center zIndexRange={[15, 5]}>
+              <button className="name-tag" onClick={(e) => { e.stopPropagation(); onSelect(id); }}>{parts[id].name}</button>
+            </Html>
+          )}
+          {hotspots && !labels && id !== selected && (
             <Billboard>
               <mesh raycast={noRaycast} renderOrder={10}>
                 <ringGeometry args={[0.03, 0.045, 24]} />
@@ -130,7 +161,7 @@ function Model({ url, parts, hovered, selected, onHover, onSelect, onMoreInfo, e
               </mesh>
             </Billboard>
           )}
-          {id === selected && (
+          {id === selected && !quiz && (
             <Html center zIndexRange={[20, 10]}>
               <div className="part-label glass">
                 <span className="dot" />
