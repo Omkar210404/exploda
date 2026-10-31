@@ -1,0 +1,74 @@
+{
+  "case_bezel": {
+    "name": "Case and Bezel",
+    "meshes": ["Bezel Frame"],
+    "description": "The metal body of the watch and the ring around the crystal. The case holds and protects the movement.",
+    "facts": [
+      "Cases are commonly made of stainless steel, titanium or precious metals.",
+      "The bezel is the ring that holds the crystal in place."
+    ]
+  },
+  "crystal": {
+    "name": "Crystal",
+    "shell": true,
+    "meshes": ["Glass Face"],
+    "description": "The clear cover over the dial.",
+    "facts": [
+      "Watch crystals are usually sapphire, mineral glass or acrylic.",
+      "Sapphire crystal is very scratch resistant."
+    ]
+  },
+  "dial": {
+    "name": "Dial",
+    "meshes": ["Watch Face"],
+    "description": "The face of the watch with hour markers and the chronograph subdials.",
+    "facts": [
+      "A chronograph dial usually has small subdials that count elapsed seconds, minutes or hours.",
+      "Markers around the edge show the hours and minutes."
+    ]
+  },
+  "hands": {
+    "name": "Hands",
+    "meshes": ["Hand *"],
+    "description": "The hour, minute and seconds hands, plus the smaller hand used for the chronograph.",
+    "facts": [
+      "The hour hand is shorter than the minute hand.",
+      "On a chronograph, a central seconds hand often runs only when the stopwatch is started."
+    ]
+  },
+  "pushers": {
+    "name": "Pushers and Crown",
+    "meshes": ["Button *"],
+    "description": "The buttons on the side of the case. The pushers start, stop and reset the chronograph; the crown sets the time.",
+    "facts": [
+      "A typical chronograph has two pushers: one to start/stop and one to reset.",
+      "The crown is turned to set the time and, on mechanical watches, to wind the mainspring."
+    ]
+  },
+  "case_back": {
+    "name": "Case Back",
+    "meshes": ["Backplate *"],
+    "description": "The back cover of the case that seals the movement inside.",
+    "facts": [
+      "Case backs are screwed, snapped or bolted on.",
+      "Some have a transparent window to show the movement."
+    ]
+  },
+  "strap": {
+    "name": "Strap",
+    "meshes": ["Band *"],
+    "description": "The band that holds the watch on the wrist.",
+    "facts": [
+      "This strap combines a carbon-fibre-look outer layer with a plastic band.",
+      "Straps attach to the case at the lugs, usually with spring bars."
+    ]
+  },
+  "buckle": {
+    "name": "Buckle (Clasp)",
+    "meshes": ["Clasp *"],
+    "description": "The fastener that closes the strap around the wrist.",
+    "facts": [
+      "Common types are the pin (tang) buckle and the folding (deployant) clasp."
+    ]
+  }
+}

@@ -10,8 +10,26 @@
           "folder": "heart",
           "file": "model.glb",
           "parts": "parts.json",
-          "description": "Chambers, valves and great vessels of the heart.",
-          "credit": { "author": "Exploda (built in code)", "license": "MIT" }
+          "description": "Real anatomy: heart wall, valves, great vessels and coronary circulation.",
+          "credit": { "author": "BodyParts3D, (c) The Database Center for Life Science", "license": "CC BY-SA 2.1 JP", "url": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html" }
+        },
+        {
+          "id": "skull",
+          "name": "Human Skull",
+          "folder": "skull",
+          "file": "model.glb",
+          "parts": "parts.json",
+          "description": "The cranial and facial bones, the jaw and the hyoid.",
+          "credit": { "author": "BodyParts3D, (c) The Database Center for Life Science", "license": "CC BY-SA 2.1 JP", "url": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html" }
+        },
+        {
+          "id": "lungs",
+          "name": "Lungs and Airways",
+          "folder": "lungs",
+          "file": "model.glb",
+          "parts": "parts.json",
+          "description": "Five lung lobes, the trachea and the bronchi.",
+          "credit": { "author": "BodyParts3D, (c) The Database Center for Life Science", "license": "CC BY-SA 2.1 JP", "url": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html" }
         }
       ]
     },
@@ -20,13 +38,13 @@
       "name": "Automotive",
       "models": [
         {
-          "id": "engine",
-          "name": "Inline-4 Engine",
-          "folder": "engine",
+          "id": "concept-car",
+          "name": "Concept Car",
+          "folder": "concept-car",
           "file": "model.glb",
           "parts": "parts.json",
-          "description": "Cutaway of a four-stroke, four-cylinder petrol engine.",
-          "credit": { "author": "Exploda (built in code)", "license": "MIT" }
+          "description": "A two-seat concept car with a full interior. Try X-ray.",
+          "credit": { "author": "Eric Chadwick, Khronos glTF Sample Assets", "license": "CC BY 4.0", "url": "https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/CarConcept" }
         }
       ]
     },
@@ -40,8 +58,9 @@
           "folder": "solar-system",
           "file": "model.glb",
           "parts": "parts.json",
-          "description": "The Sun and eight planets. Sizes and distances are not to scale.",
-          "credit": { "author": "Exploda (built in code)", "license": "MIT" }
+          "stage": "space",
+          "description": "The Sun, eight planets and the Moon. Sizes and distances are not to scale.",
+          "credit": { "author": "Planet textures: Solar System Scope", "license": "CC BY 4.0", "url": "https://www.solarsystemscope.com/textures/" }
         }
       ]
     },
@@ -49,6 +68,15 @@
       "id": "other",
       "name": "Other",
       "models": [
+        {
+          "id": "chronograph-watch",
+          "name": "Chronograph Watch",
+          "folder": "chronograph-watch",
+          "file": "model.glb",
+          "parts": "parts.json",
+          "description": "A wrist chronograph: case, dial, hands, pushers and strap.",
+          "credit": { "author": "Eric Chadwick, Khronos glTF Sample Assets", "license": "CC BY 4.0", "url": "https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/ChronographWatch" }
+        },
         {
           "id": "coming-soon",
           "name": "More models coming soon",
