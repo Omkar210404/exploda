@@ -9,3 +9,4 @@ dist/
 *.blend
 *.fbx
 *.obj
+scripts/.cache/

@@ -1,154 +1,192 @@
-// Builds the simplified multi-part models as .glb files (one named mesh per part).
-// Run: npm run models
+// Builds every model in public/models from free sources. Run: npm run models
+// Downloads are cached in scripts/.cache (git-ignored); outputs are small .glb files.
+import { mkdirSync, existsSync, readFileSync, writeFileSync, statSync } from 'node:fs';
+import { Document, NodeIO } from '@gltf-transform/core';
+import { ALL_EXTENSIONS, KHRMaterialsClearcoat } from '@gltf-transform/extensions';
+import { dedup, meshopt, normals, prune, simplifyPrimitive, textureCompress, weld } from '@gltf-transform/functions';
+import { MeshoptEncoder, MeshoptSimplifier } from 'meshoptimizer';
+import sharp from 'sharp';
 import * as THREE from 'three';
-import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { writeFileSync } from 'node:fs';
 
+await Promise.all([MeshoptEncoder.ready, MeshoptSimplifier.ready]);
+const io = new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({ 'meshopt.encoder': MeshoptEncoder });
+const CACHE = new URL('./.cache/', import.meta.url);
 const OUT = new URL('../public/models/', import.meta.url);
-const V = (x, y, z) => new THREE.Vector3(x, y, z);
+mkdirSync(CACHE, { recursive: true });
 
-// ---------- geometry helpers ----------
-function place(geo, { pos = [0, 0, 0], rot = [0, 0, 0], scale = [1, 1, 1] } = {}) {
-  const m = new THREE.Matrix4().compose(
-    V(...pos),
-    new THREE.Quaternion().setFromEuler(new THREE.Euler(...rot)),
-    V(...scale),
-  );
-  return geo.applyMatrix4(m);
+async function fetchCached(url, name) {
+  const file = new URL(name, CACHE);
+  if (!existsSync(file)) {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`${res.status} ${url}`);
+    writeFileSync(file, Buffer.from(await res.arrayBuffer()));
+  }
+  return readFileSync(file);
 }
-const sphere = (r, o) => place(new THREE.SphereGeometry(r, 40, 28), o);
-const cyl = (rt, rb, h, o, seg = 32) => place(new THREE.CylinderGeometry(rt, rb, h, seg), o);
-const box = (w, h, d, o) => place(new THREE.BoxGeometry(w, h, d), o);
-const torus = (r, t, o) => place(new THREE.TorusGeometry(r, t, 20, 64), o);
-const tube = (pts, r) => new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map((p) => V(...p))), 64, r, 20, false);
-const merge = (...geos) => mergeGeometries(geos.map((g) => { g = g.index ? g.toNonIndexed() : g; g.deleteAttribute('uv'); return g; }));
 
-// ---------- GLB writer ----------
-function writeGLB(name, parts) {
-  // normalise the whole model to ~4 units and centre it
-  const box3 = new THREE.Box3();
-  parts.forEach((p) => { p.geo.computeBoundingBox(); box3.union(p.geo.boundingBox); });
-  const size = box3.getSize(V()), center = box3.getCenter(V());
-  const s = 4 / Math.max(size.x, size.y, size.z);
-  const norm = new THREE.Matrix4().makeScale(s, s, s).multiply(new THREE.Matrix4().makeTranslation(-center.x, -center.y, -center.z));
+const linear = (hex) => { const c = new THREE.Color(hex); return [c.r, c.g, c.b, 1]; };
 
-  const bin = [], json = { asset: { version: '2.0', generator: 'exploda build-models' }, scene: 0,
-    scenes: [{ nodes: [] }], nodes: [], meshes: [], materials: [], accessors: [], bufferViews: [], buffers: [] };
-  let offset = 0;
-  const view = (arr, target) => {
-    const bytes = Buffer.from(arr.buffer, arr.byteOffset, arr.byteLength);
-    const pad = (4 - (bytes.length % 4)) % 4;
-    bin.push(bytes, Buffer.alloc(pad));
-    json.bufferViews.push({ buffer: 0, byteOffset: offset, byteLength: bytes.length, target });
-    offset += bytes.length + pad;
-    return json.bufferViews.length - 1;
+async function save(doc, id, maxTris = 30000, smooth = false, budgets = {}) {
+  // per-primitive simplification: big meshes are reduced to ~maxTris, small ones keep detail
+  await doc.transform(weld());
+  for (const mesh of doc.getRoot().listMeshes()) {
+    const limit = budgets[mesh.getName()] ?? maxTris;
+    for (const prim of mesh.listPrimitives()) {
+      const tris = prim.getIndices().getCount() / 3;
+      if (tris > limit) simplifyPrimitive(prim, { simplifier: MeshoptSimplifier, ratio: limit / tris, error: 0.01 });
+    }
+  }
+  if (smooth) await doc.transform(normals({ overwrite: true }));
+  await doc.transform(dedup(), prune(), meshopt({ encoder: MeshoptEncoder, level: 'medium' }));
+  mkdirSync(new URL(`${id}/`, OUT), { recursive: true });
+  const out = new URL(`${id}/model.glb`, OUT);
+  writeFileSync(out, await io.writeBinary(doc));
+  console.log(`${id}: ${(statSync(out).size / 1024 / 1024).toFixed(2)} MB`);
+}
+
+// ---------- BodyParts3D (real anatomy, CC BY-SA 2.1 JP) ----------
+const BP3D = 'https://raw.githubusercontent.com/Kevin-Mattheus-Moerman/BodyParts3D/main/assets/BodyParts3D_data/stl/';
+
+function parseStl(buf) {
+  const n = buf.readUInt32LE(80), pos = new Float32Array(n * 9);
+  for (let i = 0; i < n; i++) {
+    const o = 84 + i * 50 + 12;
+    for (let k = 0; k < 9; k++) pos[i * 9 + k] = buf.readFloatLE(o + k * 4);
+  }
+  return pos;
+}
+
+function clip(pos, box) {
+  // keep triangles whose centre is inside the box (trims long vessels to the organ)
+  const out = [];
+  for (let i = 0; i < pos.length; i += 9) {
+    const x = (pos[i] + pos[i + 3] + pos[i + 6]) / 3, y = (pos[i + 1] + pos[i + 4] + pos[i + 7]) / 3, z = (pos[i + 2] + pos[i + 5] + pos[i + 8]) / 3;
+    if (x >= box[0] && x <= box[3] && y >= box[1] && y <= box[4] && z >= box[2] && z <= box[5]) out.push(...pos.subarray(i, i + 9));
+  }
+  return new Float32Array(out);
+}
+
+function bounds(pos, pad = 0) {
+  const b = [Infinity, Infinity, Infinity, -Infinity, -Infinity, -Infinity];
+  for (let i = 0; i < pos.length; i += 3) for (let k = 0; k < 3; k++) { b[k] = Math.min(b[k], pos[i + k]); b[k + 3] = Math.max(b[k + 3], pos[i + k]); }
+  const s = [b[3] - b[0], b[4] - b[1], b[5] - b[2]];
+  return [b[0] - s[0] * pad, b[1] - s[1] * pad, b[2] - s[2] * pad, b[3] + s[0] * pad, b[4] + s[1] * pad, b[5] + s[2] * pad];
+}
+
+async function anatomy(id, { materials, meshes, clipTo, clipPad = 0.15, maxTris, budgets }) {
+  const doc = new Document(), buffer = doc.createBuffer();
+  const scene = doc.createScene();
+  const root = doc.createNode('root').setRotation([-Math.SQRT1_2, 0, 0, Math.SQRT1_2]); // Z-up mm -> Y-up
+  scene.addChild(root);
+  const clearcoat = doc.createExtension(KHRMaterialsClearcoat);
+  const mats = Object.fromEntries(Object.entries(materials).map(([k, m]) => {
+    const mat = doc.createMaterial(k).setBaseColorFactor(linear(m.color)).setMetallicFactor(0).setRoughnessFactor(m.rough ?? 0.5);
+    if (m.coat) mat.setExtension('KHR_materials_clearcoat', clearcoat.createClearcoat().setClearcoatFactor(m.coat).setClearcoatRoughnessFactor(0.3));
+    return [k, mat];
+  }));
+  const raw = {};
+  for (const [name, fma] of Object.entries(meshes)) raw[name] = parseStl(await fetchCached(`${BP3D}FMA${fma[0]}.stl`, `FMA${fma[0]}.stl`));
+  const box = clipTo ? bounds(raw[clipTo], clipPad) : null;
+  for (const [name, [, matName]] of Object.entries(meshes)) {
+    const pos = box ? clip(raw[name], box) : raw[name];
+    if (!pos.length) throw new Error(`${id}/${name} clipped away`);
+    const prim = doc.createPrimitive().setMaterial(mats[matName])
+      .setAttribute('POSITION', doc.createAccessor().setType('VEC3').setArray(pos).setBuffer(buffer));
+    root.addChild(doc.createNode(name).setMesh(doc.createMesh(name).addPrimitive(prim)));
+  }
+  await save(doc, id, maxTris, true, budgets);
+}
+
+await anatomy('heart', {
+  clipTo: 'heart_wall',
+  maxTris: 12000,
+  budgets: { heart_wall: 60000 },
+  materials: {
+    myocardium: { color: 0x8c2a2c, rough: 0.45, coat: 0.5 }, artery: { color: 0xb3282c, rough: 0.4, coat: 0.6 },
+    vein: { color: 0x3d4f8f, rough: 0.4, coat: 0.6 }, valve: { color: 0xe4cfae, rough: 0.55, coat: 0.3 },
+    papillary: { color: 0xa0413f, rough: 0.5, coat: 0.4 },
+  },
+  meshes: {
+    heart_wall: [7274, 'myocardium'], tricuspid_valve: [7234, 'valve'], mitral_valve: [7235, 'valve'], pulmonary_valve: [7246, 'valve'],
+    ascending_aorta: [3736, 'artery'], arch_of_aorta: [3768, 'artery'], descending_aorta: [3784, 'artery'],
+    pulmonary_artery: [66326, 'vein'], pulmonary_veins: [66643, 'artery'],
+    superior_vena_cava: [4720, 'vein'], inferior_vena_cava: [10951, 'vein'], coronary_sinus: [4706, 'vein'],
+    rca_trunk: [3802, 'artery'], rca_marginal: [3818, 'artery'], rca_posterior: ['3840nsn', 'artery'], rca_posterolateral: [76994, 'artery'],
+    lca_stem: [4685, 'artery'], lca_anterior: ['3862nsn', 'artery'], lca_circumflex: [3895, 'artery'],
+    great_cardiac_vein: [4707, 'vein'], middle_cardiac_vein: [4713, 'vein'], anterior_cardiac_veins: [71567, 'vein'], posterior_lv_veins: [76751, 'vein'],
+    papillary_rv_anterior: [7260, 'papillary'], papillary_rv_posterior: [7261, 'papillary'], papillary_rv_septal: [7262, 'papillary'],
+    papillary_lv_posterior: [7266, 'papillary'], papillary_lv: ['9352nsn', 'papillary'],
+  },
+});
+
+const bone = { color: 0xe6dcc6, rough: 0.6, coat: 0.1 };
+await anatomy('skull', {
+  maxTris: 16000,
+  materials: { bone, jaw: { ...bone, color: 0xe0d3b8 }, face: { ...bone, color: 0xe9e0cc } },
+  meshes: {
+    frontal_bone: [52734, 'bone'], parietal_right: [52788, 'bone'], parietal_left: [52789, 'bone'], temporal_right: [52738, 'bone'], temporal_left: [52739, 'bone'],
+    occipital_bone: [52735, 'bone'], sphenoid_bone: [52736, 'bone'], ethmoid_bone: [52740, 'face'], zygomatic_right: [52892, 'face'], zygomatic_left: [52893, 'face'],
+    maxilla_right: [53649, 'face'], maxilla_left: [53650, 'face'], nasal_right: [53647, 'face'], nasal_left: [53648, 'face'], lacrimal_right: [53645, 'face'],
+    lacrimal_left: [53646, 'face'], palatine_right: [53655, 'face'], palatine_left: [53656, 'face'], vomer: [9710, 'face'], mandible: [52748, 'jaw'], hyoid_bone: [52749, 'jaw'],
+  },
+});
+
+await anatomy('lungs', {
+  maxTris: 30000,
+  materials: { lung: { color: 0xd98f8a, rough: 0.55, coat: 0.35 }, lung2: { color: 0xcf8580, rough: 0.55, coat: 0.35 }, airway: { color: 0xe8d2c2, rough: 0.5, coat: 0.3 } },
+  meshes: {
+    right_upper_lobe: [7333, 'lung'], right_middle_lobe: [7383, 'lung2'], right_lower_lobe: [7337, 'lung'],
+    left_upper_lobe: [7370, 'lung2'], left_lower_lobe: [7371, 'lung'], trachea: [7394, 'airway'], bronchi: [7409, 'airway'],
+  },
+});
+
+// ---------- Solar system: textured spheres (textures: Solar System Scope, CC BY 4.0) ----------
+{
+  const TEX = 'https://www.solarsystemscope.com/textures/download/';
+  const bodies = [
+    ['sun', 2.2, 0, '2k_sun.jpg'], ['mercury', 0.2, 3.4, '2k_mercury.jpg'], ['venus', 0.34, 4.3, '2k_venus_atmosphere.jpg'],
+    ['earth', 0.36, 5.3, '2k_earth_daymap.jpg'], ['moon', 0.1, 5.85, '2k_moon.jpg'], ['mars', 0.27, 6.4, '2k_mars.jpg'],
+    ['jupiter', 0.95, 8.2, '2k_jupiter.jpg'], ['saturn', 0.8, 10.6, '2k_saturn.jpg'], ['uranus', 0.55, 12.6, '2k_uranus.jpg'], ['neptune', 0.53, 14.2, '2k_neptune.jpg'],
+  ];
+  const doc = new Document(), buffer = doc.createBuffer(), scene = doc.createScene();
+  const texture = async (file, mime = 'image/jpeg') => doc.createTexture(file).setImage(await fetchCached(TEX + file, file)).setMimeType(mime);
+  const addGeo = (name, geo, mat, pos) => {
+    const prim = doc.createPrimitive().setMaterial(mat).setIndices(doc.createAccessor().setType('SCALAR').setArray(new Uint32Array(geo.index.array)).setBuffer(buffer));
+    for (const [attr, key, type] of [['position', 'POSITION', 'VEC3'], ['normal', 'NORMAL', 'VEC3'], ['uv', 'TEXCOORD_0', 'VEC2']]) {
+      prim.setAttribute(key, doc.createAccessor().setType(type).setArray(new Float32Array(geo.attributes[attr].array)).setBuffer(buffer));
+    }
+    return doc.createNode(name).setMesh(doc.createMesh(name).addPrimitive(prim)).setTranslation(pos);
   };
-
-  parts.forEach((p, i) => {
-    let g = p.geo.applyMatrix4(norm);
-    const pos = g.attributes.position.array, nrm = g.attributes.normal.array;
-    const count = g.attributes.position.count;
-    const src = g.index ? g.index.array : [...Array(count).keys()];
-    const idx = count > 65535 ? new Uint32Array(src) : new Uint16Array(src);
-    g.computeBoundingBox();
-    const { min, max } = g.boundingBox;
-    json.accessors.push(
-      { bufferView: view(new Float32Array(pos), 34962), componentType: 5126, count, type: 'VEC3', min: min.toArray(), max: max.toArray() },
-      { bufferView: view(new Float32Array(nrm), 34962), componentType: 5126, count, type: 'VEC3' },
-      { bufferView: view(idx, 34963), componentType: count > 65535 ? 5125 : 5123, count: idx.length, type: 'SCALAR' },
-    );
-    const c = new THREE.Color(p.color); // stored linear, as glTF expects
-    const e = new THREE.Color(p.emissive ?? 0x000000);
-    json.materials.push({ name: p.id, pbrMetallicRoughness: { baseColorFactor: [c.r, c.g, c.b, 1],
-      metallicFactor: p.metal ?? 0.05, roughnessFactor: p.rough ?? 0.5 }, emissiveFactor: [e.r, e.g, e.b], doubleSided: !!p.double });
-    json.meshes.push({ name: p.id, primitives: [{ attributes: { POSITION: i * 3, NORMAL: i * 3 + 1 }, indices: i * 3 + 2, material: i }] });
-    json.nodes.push({ name: p.id, mesh: i });
-    json.scenes[0].nodes.push(i);
-  });
-
-  const binBuf = Buffer.concat(bin);
-  json.buffers.push({ byteLength: binBuf.length });
-  let jsonBuf = Buffer.from(JSON.stringify(json));
-  jsonBuf = Buffer.concat([jsonBuf, Buffer.alloc((4 - (jsonBuf.length % 4)) % 4, 0x20)]);
-  const header = Buffer.alloc(12);
-  header.writeUInt32LE(0x46546c67, 0); header.writeUInt32LE(2, 4);
-  header.writeUInt32LE(12 + 8 + jsonBuf.length + 8 + binBuf.length, 8);
-  const chunk = (len, type) => { const b = Buffer.alloc(8); b.writeUInt32LE(len, 0); b.writeUInt32LE(type, 4); return b; };
-  const glb = Buffer.concat([header, chunk(jsonBuf.length, 0x4e4f534a), jsonBuf, chunk(binBuf.length, 0x004e4942), binBuf]);
-  writeFileSync(new URL(`${name}/model.glb`, OUT), glb);
-  console.log(`${name}: ${parts.length} parts, ${(glb.length / 1024).toFixed(0)} KB`);
+  for (const [i, [name, r, d, file]] of bodies.entries()) {
+    const a = name === 'moon' ? -0.5 + 3 * 0.12 + 0.12 : -0.5 + i * 0.12;
+    const pos = [d * Math.cos(a), 0, d * Math.sin(a)];
+    const tex = await texture(file);
+    const mat = doc.createMaterial(name).setRoughnessFactor(0.9).setMetallicFactor(0);
+    if (name === 'sun') mat.setEmissiveTexture(tex).setEmissiveFactor([1, 1, 1]).setBaseColorFactor([0, 0, 0, 1]);
+    else mat.setBaseColorTexture(tex);
+    const node = addGeo(name, new THREE.SphereGeometry(r, 64, 48), mat, pos);
+    if (name === 'saturn') {
+      // ring with radial UVs so the ring texture runs from inner to outer edge
+      const ring = new THREE.RingGeometry(r * 1.24, r * 2.27, 128, 1);
+      const p = ring.attributes.position, uv = ring.attributes.uv;
+      for (let k = 0; k < p.count; k++) uv.setXY(k, (Math.hypot(p.getX(k), p.getY(k)) - r * 1.24) / (r * 1.03), 0.5);
+      ring.rotateX(-Math.PI / 2);
+      const ringMat = doc.createMaterial('saturn_ring').setBaseColorTexture(await texture('2k_saturn_ring_alpha.png', 'image/png'))
+        .setAlphaMode('BLEND').setDoubleSided(true).setRoughnessFactor(0.9).setMetallicFactor(0);
+      node.addChild(addGeo('saturn_ring', ring, ringMat, [0, 0, 0]).setRotation(new THREE.Quaternion().setFromEuler(new THREE.Euler(0.45, 0, 0.1)).toArray()));
+    }
+    scene.addChild(node);
+  }
+  await doc.transform(textureCompress({ encoder: sharp, targetFormat: 'webp', resize: [1024, 1024], quality: 85 }));
+  await save(doc, 'solar-system', 100000);
 }
 
-// ---------- Human heart (anterior view, simplified) ----------
-const blueVessel = 0x3f5f9f, redVessel = 0xc2413f;
-writeGLB('heart', [
-  { id: 'right_atrium', color: 0xa33a44, geo: sphere(0.9, { pos: [-1.05, 1.05, 0.15], scale: [1, 0.95, 0.9] }) },
-  { id: 'left_atrium', color: 0xa8424a, geo: sphere(0.82, { pos: [0.95, 1.2, -0.55], scale: [1.1, 0.85, 0.9] }) },
-  { id: 'right_ventricle', color: 0x8f2430, geo: sphere(1.25, { pos: [-0.55, -0.45, 0.45], rot: [0, 0, 0.25], scale: [1, 1.2, 0.8] }) },
-  { id: 'left_ventricle', color: 0x9c2a35, geo: sphere(1.3, { pos: [0.55, -0.7, -0.15], rot: [0, 0, 0.4], scale: [1, 1.45, 1] }) },
-  { id: 'aorta', color: redVessel, geo: tube([[0.15, 0.8, 0], [0.1, 2.2, 0.1], [0.5, 3.0, -0.1], [1.3, 2.9, -0.5], [1.65, 1.8, -0.9], [1.7, 0.2, -1.0]], 0.32) },
-  { id: 'pulmonary_trunk', color: blueVessel, geo: merge(
-    tube([[-0.3, 0.8, 0.75], [-0.15, 1.8, 0.85], [0.3, 2.35, 0.55]], 0.28),
-    tube([[0.3, 2.35, 0.55], [1.0, 2.4, 0.3], [1.9, 2.3, 0.1]], 0.16),
-    tube([[0.3, 2.35, 0.55], [-0.6, 2.5, 0.4], [-1.9, 2.4, 0.1]], 0.16)) },
-  { id: 'superior_vena_cava', color: blueVessel, geo: tube([[-1.2, 1.5, 0.05], [-1.25, 2.4, 0], [-1.2, 3.3, -0.1]], 0.26) },
-  { id: 'inferior_vena_cava', color: blueVessel, geo: tube([[-1.1, 0.4, -0.15], [-1.15, -0.6, -0.4], [-1.2, -1.7, -0.5]], 0.26) },
-  { id: 'pulmonary_veins', color: 0xb8484a, geo: merge(
-    tube([[1.3, 1.45, -0.6], [1.9, 1.6, -0.55], [2.5, 1.7, -0.5]], 0.11),
-    tube([[1.35, 1.0, -0.6], [1.95, 0.95, -0.6], [2.5, 0.9, -0.55]], 0.11),
-    tube([[0.55, 1.45, -0.9], [0.1, 1.6, -1.2], [-0.5, 1.7, -1.4]], 0.11),
-    tube([[0.55, 1.0, -0.95], [0.1, 0.95, -1.25], [-0.5, 0.9, -1.45]], 0.11)) },
-  { id: 'tricuspid_valve', color: 0xe8d3a6, rough: 0.35, geo: torus(0.42, 0.09, { pos: [-0.85, 0.35, 0.6], rot: [1.2, 0, 0.3] }) },
-  { id: 'mitral_valve', color: 0xe8d3a6, rough: 0.35, geo: torus(0.4, 0.09, { pos: [0.85, 0.45, -0.35], rot: [1.3, 0, -0.4] }) },
-  { id: 'aortic_valve', color: 0xf0dcb0, rough: 0.35, geo: torus(0.36, 0.08, { pos: [0.15, 0.85, 0], rot: [Math.PI / 2, 0, 0] }) },
-  { id: 'pulmonary_valve', color: 0xf0dcb0, rough: 0.35, geo: torus(0.32, 0.075, { pos: [-0.3, 0.85, 0.75], rot: [Math.PI / 2, 0, 0] }) },
-  { id: 'coronary_arteries', color: 0xe36a5c, geo: merge(
-    tube([[0.15, 0.75, 0.6], [0.05, 0.1, 1.05], [0.15, -0.9, 0.95], [0.35, -1.9, 0.45]], 0.06),
-    tube([[-0.1, 0.75, 0.55], [-0.9, 0.3, 0.95], [-1.45, -0.4, 0.55], [-1.3, -1.2, 0.1]], 0.06)) },
-]);
-
-// ---------- Inline-4 engine (cutaway: block and head sit behind the moving parts) ----------
-const xs = [-1.8, -0.6, 0.6, 1.8], up = [true, false, false, true];
-const steel = 0x9aa3ad;
-writeGLB('engine', [
-  { id: 'cylinder_block', color: 0x5f6873, metal: 0.6, rough: 0.55, geo: box(4.8, 2.6, 0.9, { pos: [0, -0.1, -1.0] }) },
-  { id: 'cylinder_head', color: 0x737d88, metal: 0.6, rough: 0.5, geo: box(4.8, 0.8, 1.6, { pos: [0, 1.75, -0.75] }) },
-  { id: 'pistons', color: 0xc9ced4, metal: 0.85, rough: 0.3, geo: merge(...xs.map((x, i) => cyl(0.42, 0.42, 0.55, { pos: [x, up[i] ? 0.85 : 0.35, 0] }))) },
-  { id: 'connecting_rods', color: steel, metal: 0.85, rough: 0.35, geo: merge(...xs.map((x, i) => {
-    const top = up[i] ? 0.7 : 0.2, bot = up[i] ? -1.0 : -1.6;
-    return box(0.16, top - bot, 0.12, { pos: [x, (top + bot) / 2, 0.05] });
-  })) },
-  { id: 'crankshaft', color: 0x8a939e, metal: 0.9, rough: 0.3, geo: merge(
-    cyl(0.17, 0.17, 5.0, { pos: [0, -1.3, 0], rot: [0, 0, Math.PI / 2] }),
-    ...xs.flatMap((x, i) => [box(0.12, 0.75, 0.5, { pos: [x - 0.18, up[i] ? -1.05 : -1.55, 0] }), box(0.12, 0.75, 0.5, { pos: [x + 0.18, up[i] ? -1.05 : -1.55, 0] })])) },
-  { id: 'camshaft', color: 0xa7afb8, metal: 0.9, rough: 0.3, geo: merge(
-    cyl(0.1, 0.1, 5.0, { pos: [0, 2.45, 0.1], rot: [0, 0, Math.PI / 2] }),
-    ...xs.flatMap((x) => [-0.2, 0.2].map((dx) => cyl(0.17, 0.17, 0.1, { pos: [x + dx, 2.4, 0.1], rot: [0, 0, Math.PI / 2], scale: [1, 1, 1.4] })))) },
-  { id: 'intake_valves', color: 0xb9c2cb, metal: 0.9, rough: 0.25, geo: merge(...xs.flatMap((x) => [
-    cyl(0.03, 0.03, 0.9, { pos: [x - 0.2, 1.65, 0.1] }), cyl(0.15, 0.15, 0.04, { pos: [x - 0.2, 1.2, 0.1] })])) },
-  { id: 'exhaust_valves', color: 0xc08a5a, metal: 0.8, rough: 0.35, geo: merge(...xs.flatMap((x) => [
-    cyl(0.03, 0.03, 0.9, { pos: [x + 0.2, 1.65, 0.1] }), cyl(0.14, 0.14, 0.04, { pos: [x + 0.2, 1.2, 0.1] })])) },
-  { id: 'spark_plugs', color: 0xe9e6df, rough: 0.4, geo: merge(...xs.flatMap((x) => [
-    cyl(0.07, 0.07, 0.5, { pos: [x, 1.55, 0.35] }), cyl(0.1, 0.1, 0.18, { pos: [x, 1.9, 0.35] }, 6)])) },
-  { id: 'flywheel', color: 0x6b737c, metal: 0.85, rough: 0.4, geo: cyl(1.1, 1.1, 0.18, { pos: [-2.75, -1.3, 0], rot: [0, 0, Math.PI / 2] }, 64) },
-  { id: 'timing_belt', color: 0x2a2d31, rough: 0.8, geo: merge(
-    torus(0.3, 0.05, { pos: [2.65, -1.3, 0], rot: [0, Math.PI / 2, 0] }), torus(0.3, 0.05, { pos: [2.65, 2.45, 0.1], rot: [0, Math.PI / 2, 0] }),
-    box(0.06, 3.75, 0.1, { pos: [2.65, 0.575, 0.3] }), box(0.06, 3.75, 0.1, { pos: [2.65, 0.575, -0.27] })) },
-  { id: 'oil_pan', color: 0x4b525a, metal: 0.5, rough: 0.6, geo: box(4.6, 0.55, 1.7, { pos: [0, -2.35, -0.3] }) },
-]);
-
-// ---------- Solar system (sizes and distances not to scale) ----------
-const planets = [
-  ['mercury', 0.18, 2.7, 0x9c958c], ['venus', 0.3, 3.5, 0xd9b77a], ['earth', 0.32, 4.4, 0x3f7fcf], ['mars', 0.24, 5.2, 0xc1593a],
-  ['jupiter', 0.78, 6.6, 0xc9a27e], ['saturn', 0.64, 8.4, 0xdcc48f], ['uranus', 0.46, 9.9, 0x8fd2d8], ['neptune', 0.45, 11.1, 0x4a6fd8],
-];
-writeGLB('solar-system', [
-  { id: 'sun', color: 0xffb547, emissive: 0xff9a2e, rough: 1, geo: sphere(1.7, {}) },
-  ...planets.map(([id, r, d, color], i) => {
-    const a = -0.5 + i * 0.13, pos = [d * Math.cos(a), 0, d * Math.sin(a)];
-    const geo = id === 'saturn'
-      ? merge(sphere(r, { pos }), place(new THREE.RingGeometry(r * 1.35, r * 2.2, 64), { pos, rot: [-Math.PI / 2 + 0.45, 0, 0] }))
-      : sphere(r, { pos });
-    return { id, color, rough: 0.7, double: id === 'saturn', geo };
-  }),
-]);
+// ---------- Khronos sample assets (realistic PBR models) ----------
+async function khronos(id, name, size = 1024) {
+  const url = `https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/${name}/glTF-Binary/${name}.glb`;
+  const doc = await io.readBinary(new Uint8Array(await fetchCached(url, `${name}.glb`)));
+  await doc.transform(textureCompress({ encoder: sharp, targetFormat: 'webp', resize: [size, size], quality: 82 }));
+  await save(doc, id, 200000);
+}
+await khronos('concept-car', 'CarConcept');
+await khronos('chronograph-watch', 'ChronographWatch');
